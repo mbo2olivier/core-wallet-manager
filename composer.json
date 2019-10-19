@@ -1,0 +1,20 @@
+{
+    "name": "mukadi/core-wallet-manager",
+    "description": "A lightweight php library to manage a simple electronic wallet platform",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Olivier M. Mukadi",
+            "email": "mbo2olivier@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.9"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mukadi\\Wallet\\Core\\": "src"
+        }
+    }
+}
