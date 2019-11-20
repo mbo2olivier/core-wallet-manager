@@ -8,11 +8,17 @@
  */
 namespace Mukadi\Wallet\Core\Manager;
 
+use Mukadi\Wallet\Core\AuthorizationException;
 use Mukadi\Wallet\Core\Codes;
+use Mukadi\Wallet\Core\Exception\BalanceException;
+use Mukadi\Wallet\Core\Request;
+use Mukadi\Wallet\Core\Reversal;
+use Mukadi\Wallet\Core\AuthorizationInterface;
 use Mukadi\Wallet\Core\WalletInterface;
 use Mukadi\Wallet\Core\OperationInterface;
 use Mukadi\Wallet\Core\Exception\WalletException;
 use Mukadi\Wallet\Core\Exception\OperationException;
+use Mukadi\Wallet\Core\Exception\StorageLayerException;
 use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
 
 /**
@@ -24,9 +30,18 @@ abstract class AbstractWalletManager
 {
     /** @var WalletStorageLayer $storage  */
     protected $storage;
+    /** @var string */
+    protected $authClass;
+    /** @var string */
+    protected $opClass;
+    /** @var  AbstractSchemaManager */
+    protected $schema;
 
-    public function __construct(WalletStorageLayer $storage) {
+    public function __construct(AbstractSchemaManager $schema,WalletStorageLayer $storage, $authClass, $opClass) {
         $this->storage = $storage;
+        $this->authClass = $authClass;
+        $this->opClass = $opClass;
+        $this->schema = $schema;
     }
 
     /**
@@ -39,6 +54,7 @@ abstract class AbstractWalletManager
      **/
     public function openWallet(WalletInterface $wallet)
     {
+        $wallet->setWalletId($this->generateWalletIdFor($wallet));
         $wallet = $this->beforeOpenWallet($wallet);
         
         $wallet->setCreatedAt(new \DateTime('now'));
@@ -52,13 +68,19 @@ abstract class AbstractWalletManager
     /**
      * close a wallet
      *
-     * @param WalletInterface $wallet 
+     * @param string $walletId
      * @return WalletInterface
      * @throws WalletException
      * @throws StorageLayerException
      **/
-    public function closeWallet(WalletInterface $wallet)
+    public function closeWallet($walletId)
     {
+        $wallet = $this->storage->findWalletBy(["walletId" => $walletId]);
+        if($wallet == null)
+            throw new WalletException("cannot find wallet with Id : ".$walletId);
+        if($wallet->isClosed())
+            throw new WalletException('Wallet already closed');
+
         $wallet = $this->beforeCloseWallet($wallet);
         
         $wallet->setClosedAt(new \DateTime('now'));
@@ -70,13 +92,174 @@ abstract class AbstractWalletManager
     }
 
     /**
-     * Execute an operation
-     * 
-     * @param OperationInterface $op
-     * @return OperationInterface
+     * @param Request $r
+     * @return AuthorizationInterface
+     * @throws BalanceException
+     * @throws WalletException
+     */
+    public function authorize(Request $r) {
+        /** @var WalletInterface $wallet */
+        $wallet = $this->storage->findWalletBy(["walletId" => $r->getWalletId()]);
+        if($wallet == null) {
+            throw new WalletException("Cannot find targeted wallet with id : ". $r->getWalletId());
+        }
+
+        if($wallet->getCurrency() !== $r->getCurrency()) {
+            throw new WalletException("Cannot find targeted wallet with id : ". $r->getWalletId());
+        }
+
+        $outcome = $wallet->getBalance() - $r->getAmount();
+        if($outcome >= 0) {
+            $class = $this->opClass;
+            /** @var OperationInterface $op */
+            $op = new $class();
+            $op->setReversal(false);
+            $op->setAmount($r->getAmount());
+            $op->setCurrency($r->getCurrency());
+            $op->setLabel($r->getLabel());
+            $op->setWalletId($r->getWalletId());
+            $op->setDate(new \DateTime('now'));
+            $op->setMaker($r->getRequester());
+            $op->setType(Codes::OPERATION_TYPE_CASH_OUT);
+            $op->setPlatformId($wallet->getWalletId());
+
+
+            $class = $this->authClass;
+            /** @var AuthorizationInterface $auth */
+            $auth = new $class();
+            $auth->setType(Codes::AUTH_TYPE_DEBIT);
+            $auth->setAmount($r->getAmount());
+            $auth->setCurrency($r->getCurrency());
+            $auth->setCode($r->getCode());
+            $auth->setAuthorizationRef($r->getAuthorizationRef());
+            $auth->setPlatformId($wallet->getPlatformId());
+            $auth->setChannelId($r->getChannelId());
+            $auth->setAuthorizationId($this->getNextAuthorizationId());
+            $auth->setStatus(Codes::AUTH_STATUS_PENDING);
+            $auth->setBalance($outcome);
+            $auth->setRequester($r->getRequester());
+            $this->storage->saveAuthorization($auth);
+
+            $op->setAuthorizationId($auth->getAuthorizationId());
+            $this->execute($op);
+
+            return $auth;
+        }
+        else
+            throw new BalanceException("insufficient balance");
+    }
+
+    /**
+     * @param string $authId
+     * @return AuthorizationInterface
+     * @throws AuthorizationException
      * @throws OperationException
      */
-    public function execute(OperationInterface $op) {
+    public function authorizationRedemption($authId) {
+        $auth = $this->storage->findAuthorizationBy(["authorizationId" => $authId]);
+
+        if($auth == null) {
+            throw new AuthorizationException("cannot find authorization with id: ". $authId);
+        }
+
+        if($auth->getStatus() !== Codes::AUTH_STATUS_PENDING) {
+            throw new AuthorizationException("authorization is not pending");
+        }
+
+        if($auth->getType() !== Codes::AUTH_TYPE_DEBIT) {
+            throw new AuthorizationException("non debit authorization not allowed");
+        }
+        $auth = $this->beforeAuthorizationRedemption($auth);
+        $ops = $this->schema->getSchemaFor($auth->getCode());
+
+        foreach($ops as $op) {
+            $op->setStatus(Codes::OPERATION_STATUS_INIT);
+            $op->setAuthorizationId($authId);
+            $op->setDate(new \DateTime('now'));
+            $op->setPlatformId($auth->getPlatformId());
+            $op->setMaker($auth->getRequester());
+            $op->setReversal(false);
+
+            $this->execute($op);
+        }
+        $auth->setStatus(Codes::AUTH_STATUS_FINALIZED);
+
+        $this->storage->saveAuthorization($auth);
+
+        return $this->afterAuthorizationRedemption($auth);
+    }
+
+    public function authorizationReversal(Reversal $reversal) {
+        $authId = $reversal->getPreviousAuthId();
+        $previous = $this->storage->findAuthorizationBy(["authorizationId" => $authId]);
+
+        if($previous == null) {
+            throw new AuthorizationException("cannot find authorization to reverse with id: ". $authId);
+        }
+
+        if($previous->getStatus() !== Codes::AUTH_STATUS_FINALIZED) {
+            throw new AuthorizationException("authorization is not finalized");
+        }
+
+        if($previous->getType() !== Codes::AUTH_TYPE_DEBIT) {
+            throw new AuthorizationException("reversal of non debit authorization not allowed");
+        }
+        $class = $this->authClass;
+        /** @var AuthorizationInterface $auth */
+        $auth = new $class();
+        $auth->setType(Codes::AUTH_TYPE_REVERSE);
+        $auth->setAmount($previous->getAmount());
+        $auth->setCurrency($previous->getCurrency());
+        $auth->setCode($previous->getCode());
+        $auth->setAuthorizationRef($previous->getAuthorizationRef());
+        $auth->setPlatformId($previous->getPlatformId());
+        $auth->setChannelId($previous->getChannelId());
+        $auth->setAuthorizationId($this->getNextAuthorizationId());
+        $auth->setStatus(Codes::AUTH_STATUS_PENDING);
+        $auth->setBalance($previous->getBalance() + $previous->getAmount());
+        $auth->setWalletId($previous->getWalletId());
+        $auth->setRequester($reversal->getMaker());
+        $this->storage->saveAuthorization($auth);
+
+        $auth = $this->beforeAuthorizationReversal($auth);
+
+        $ops = $this->storage->listOperationBy(["authorizationId" => $previous->getAuthorizationId()]);
+        $class = $this->opClass;
+        foreach($ops as $o) {
+            /** @var OperationInterface $rop */
+            $rop = new $class();
+            $rop->setAmount($o->getAmount());
+            $rop->setCurrency($o->getCurrency());
+            $rop->setPlatformId($o->getPlatformId());
+            $rop->setType($o->getType() === Codes::OPERATION_TYPE_CASH_OUT ? Codes::OPERATION_TYPE_CASH_IN : Codes::OPERATION_TYPE_CASH_OUT);
+            $rop->setLabel($o->getLabel());
+            $rop->setReversal(true);
+            $rop->setReversedFrom($o->getOperationId());
+            $rop->setDate(new \DateTime('now'));
+            $rop->setWalletId($o->getWalletId());
+            $rop->setStatus(Codes::OPERATION_STATUS_INIT);
+            $rop->setAuthorizationId($auth->getAuthorizationId());
+            $rop->setMaker($reversal->getMaker());
+
+            $this->execute($rop);
+        }
+
+        $auth->setStatus(Codes::AUTH_STATUS_REVERSED);
+        $this->storage->saveAuthorization($auth);
+
+        return $this->afterAuthorizationReversal($auth);
+    }
+
+    /**
+     * Execute an operation
+     *
+     * @param OperationInterface $op
+     * @throws BalanceException
+     * @throws OperationException
+     * @throws AuthorizationException
+     * @return OperationInterface
+     */
+    protected  function execute(OperationInterface $op) {
         if(! $op->getOperationId()) {
             $op->setOperationId($this->generateOperationIdFor($op));
         }
@@ -90,32 +273,36 @@ abstract class AbstractWalletManager
         /** @var WalletInterface $wallet */
         $wallet = $this->storage->findWalletBy(["walletId" => $op->getWalletId()]);
         if($wallet == null) {
-            $op->setStatus(Codes::OPERATION_STATUS_EROR);
+            $op->setStatus(Codes::OPERATION_STATUS_ERROR);
             $this->storage->saveOperation($op);
             throw new OperationException("Cannot find targeted operation wallet", $op);
         }
 
         if($wallet->getCurrency() !== $op->getCurrency()) {
-            $op->setStatus(Codes::OPERATION_STATUS_EROR);
+            $op->setStatus(Codes::OPERATION_STATUS_ERROR);
             $this->storage->saveOperation($op);
             throw new OperationException("Wallet currency mismatch", $op);
         }
 
-        $outcome = $outcome = $op->getType() === Codes::OPERATION_TYPE_CASHIN ? ($wallet->getBalance() + $op->getAmount()) : ($wallet->getBalance() - $op->getAmount());
-        if(! $op->getAuthorizationId()) {
-            if($outcome < 0) {
-                $op->setStatus(Codes::OPERATION_STATUS_UNAUTHORIZED);
-                $this->storage->saveOperation($op);
-                throw new OperationException("insufficient balance", $op);
-            }
-            $op->setAuthorizationId($this->getNextAuthorizationId());
-            $op->setValidatedAt(new \DateTime('now'));
-            $op->setValidator(Codes::SYSTEM_VALIDATOR);
-            $op->setStatus(Codes::OPERATION_STATUS_AUTHORIZED);
+        $auth = $this->storage->findAuthorizationBy(["authorizationId" => $op->getAuthorizationId()]);
+        if($auth == null) {
+            $op->setStatus(Codes::OPERATION_STATUS_UNAUTHORIZED);
+            $this->storage->saveOperation($op);
+            throw new AuthorizationException("unauthorized operation");
         }
+        if($auth->getType() !== Codes::AUTH_STATUS_PENDING) {
+            $op->setStatus(Codes::OPERATION_STATUS_UNAUTHORIZED);
+            $this->storage->saveOperation($op);
+            throw new AuthorizationException('operation not allowed for non pending status authorization');
+        }
+
+        $outcome = $op->getType() === Codes::OPERATION_TYPE_CASH_IN ? ($wallet->getBalance() + $op->getAmount()) : ($wallet->getBalance() - $op->getAmount());
+        $op->setValidatedAt(new \DateTime('now'));
+        $op->setValidator(Codes::SYSTEM_VALIDATOR);
+        $op->setStatus(Codes::OPERATION_STATUS_AUTHORIZED);
         
         $wallet->setBalance($outcome);
-        $wallet->setBalancepdatedAt(new \DateTime('now'));
+        $wallet->setBalanceUpdatedAt(new \DateTime('now'));
         $op->setBalance($outcome);
         $op->setStatus(Codes::OPERATION_STATUS_SUCCESS);
         
@@ -180,4 +367,34 @@ abstract class AbstractWalletManager
      * @return string
      */
     public abstract function getNextAuthorizationId();
+
+    /**
+     * @param WalletInterface $wallet
+     * @return string
+     */
+    public abstract function generateWalletIdFor(WalletInterface $wallet);
+
+    /**
+     * @param AuthorizationInterface $auth
+     * @return AuthorizationInterface
+     */
+    public abstract function beforeAuthorizationRedemption(AuthorizationInterface $auth);
+
+    /**
+     * @param AuthorizationInterface $auth
+     * @return AuthorizationInterface
+     */
+    public abstract function afterAuthorizationRedemption(AuthorizationInterface $auth);
+
+    /**
+     * @param AuthorizationInterface $auth
+     * @return AuthorizationInterface
+     */
+    public abstract function beforeAuthorizationReversal(AuthorizationInterface $auth);
+
+    /**
+     * @param AuthorizationInterface $auth
+     * @return AuthorizationInterface
+     */
+    public abstract function afterAuthorizationReversal(AuthorizationInterface $auth);
 }

@@ -15,11 +15,11 @@ namespace Mukadi\Wallet\Core;
 interface OperationInterface
 {
     /**
-     * @return decimal
+     * @return double
      */
     public function getAmount();
     /**
-     * @param decimal $amount
+     * @param double $amount
      */
     public function setAmount($amount);
     /**
@@ -119,11 +119,11 @@ interface OperationInterface
      */
     public function setAuthorizationId($authId);
     /**
-     * @return decimal
+     * @return double
      */
     public function getBalance();
     /**
-     * @param decimal $balance
+     * @param double $balance
      */
     public function setBalance($balance);
     /**
@@ -134,4 +134,20 @@ interface OperationInterface
      * @param string $pif
      */
     public function setPlatformId($pif);
+    /**
+     * @return bool
+     */
+    public function isReversal();
+    /**
+     * @param boolean $b
+     */
+    public function setReversal($b);
+    /**
+     * @return string
+     */
+    public function getReversedFrom();
+    /**
+     * @param string $opId
+     */
+    public function setReversedFrom($opId);
 }

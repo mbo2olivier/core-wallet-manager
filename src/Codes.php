@@ -14,14 +14,25 @@ namespace Mukadi\Wallet\Core;
  */
 class Codes 
 {
-    const SYSTEM_VALIDATOR = "SYETEM";
+    const SYSTEM_VALIDATOR = "SYSTEM";
 
-    const OPERATION_TYPE_CASHIN = "C";
-    const OPERATION_TYPE_CASHOUT = "D";
+    const OPERATION_TYPE_CASH_IN = "C";
+    const OPERATION_TYPE_CASH_OUT = "D";
 
     const OPERATION_STATUS_INIT = "I";
     const OPERATION_STATUS_SUCCESS = "S";
     const OPERATION_STATUS_AUTHORIZED = "A";
     const OPERATION_STATUS_UNAUTHORIZED = "U";
-    const OPERATION_STATUS_EROR = "E";
+    const OPERATION_STATUS_ERROR = "E";
+
+    const TX_STATUS_OPENED = "O";
+    const TX_STATUS_CANCELED = "C";
+    const TX_STATUS_TERMINATED = "T";
+
+    const AUTH_STATUS_PENDING = "P";
+    const AUTH_STATUS_FINALIZED = "F";
+    const AUTH_STATUS_REVERSED = "R";
+
+    const AUTH_TYPE_DEBIT = 'D';
+    const AUTH_TYPE_REVERSE = 'R';
 }

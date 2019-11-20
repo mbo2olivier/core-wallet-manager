@@ -11,6 +11,8 @@ namespace Mukadi\Wallet\Core\Storage;
 use Mukadi\Wallet\Core\WalletInterface;
 use Mukadi\Wallet\Core\OperationInterface;
 use Mukadi\Wallet\Core\HolderInterface;
+use Mukadi\Wallet\Core\AuthorizationInterface;
+use Mukadi\Wallet\Core\PlatformInterface;
 use Mukadi\Wallet\Core\Exception\StorageLayerException;
 /**
  * class WalletStorageLayer.
@@ -19,6 +21,7 @@ use Mukadi\Wallet\Core\Exception\StorageLayerException;
  */
 abstract class WalletStorageLayer
 {
+    use FindByCallResolver;
     /**
      * begin a transaction for a batch database operations
      */
@@ -30,7 +33,7 @@ abstract class WalletStorageLayer
     /**
      * cancel database batch operations
      */
-    public abstract function roolback();
+    public abstract function rollback();
     
     /**
      * save wallet in the storage layer
@@ -114,6 +117,15 @@ abstract class WalletStorageLayer
     public abstract function getPlatform($id);
 
     /**
+     * getting operations by criteria
+     *
+     * @param array $criteria
+     * @return OperationInterface[]
+     * @throws StorageLayerException
+     **/
+    public abstract function listOperationBy(array $criteria);
+
+    /**
      * Adds support for magic method calls.
      *
      * @param string $method
@@ -124,7 +136,7 @@ abstract class WalletStorageLayer
      * @throws StorageLayerException
      * @throws \BadMethodCallException If the method called is invalid
      */
-    public function __call($func, $arguments) {
+    public function __call($method, $arguments) {
         if (0 === strpos($method, 'findWalletBy')) {
             return $this->resolveFindByCall('findWalletBy', substr($method, 12), $arguments);
         }
@@ -144,26 +156,5 @@ abstract class WalletStorageLayer
         throw new \BadMethodCallException(
             "Undefined method '$method'"
         );
-    }
-
-    /**
-     * Resolves a findBy magic method call to the proper existent method at `WalletStorageLayer`.
-     *
-     * @param string $method    The method to call
-     * @param string $by        The property name used as condition
-     * @param array  $arguments The arguments to pass at method call
-     *
-     * @throws StorageLayerException
-     *
-     * @return mixed
-     */
-    protected function resolveFindByCall($method, $by, $arguments) {
-        if (! $arguments) {
-            throw new StorageLayerException("You need to pass a parameter to '".$method.$by."'");
-        }
-
-        $prop = lcfirst($by);
-
-        return $this->$method([$prop => $arguments[0]]);
     }
 }

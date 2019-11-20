@@ -17,7 +17,7 @@ class Request
     /** @var string $code  */
     protected $code;
 
-    /** @var decimal $amount  */
+    /** @var double $amount  */
     protected $amount;
 
     /** @var string $currency  */
@@ -31,6 +31,45 @@ class Request
 
     /** @var string $authorizationRef  */
     protected $authorizationRef;
+
+    /** @var  string */
+    protected $label;
+
+    /** @var  string */
+    protected $requester;
+
+    /**
+     * @return string
+     */
+    public function getRequester()
+    {
+        return $this->requester;
+    }
+
+    /**
+     * @param string $requester
+     */
+    public function setRequester($requester)
+    {
+        $this->requester = $requester;
+    }
+
+
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
 
     /**
      * Get the value of code

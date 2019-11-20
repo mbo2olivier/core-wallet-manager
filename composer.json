@@ -10,7 +10,8 @@
         }
     ],
     "require": {
-        "php": ">=5.5.9"
+        "php": ">=5.5.9",
+        "symfony/expression-language": ">=3.4"
     },
     "autoload": {
         "psr-4": {

@@ -15,11 +15,19 @@ namespace Mukadi\Wallet\Core;
 interface AuthorizationInterface
 {
     /**
-     * @return decimal
+     * @return double
+     */
+    public function getBalance();
+    /**
+     * @param double $balance
+     */
+    public function setBalance($balance);
+    /**
+     * @return double
      */
     public function getAmount();
     /**
-     * @param decimal $amount
+     * @param double $amount
      */
     public function setAmount($amount);
     /**
@@ -38,6 +46,14 @@ interface AuthorizationInterface
      * @param string $code
      */
     public function setCode($code);
+    /**
+     * @return string
+     */
+    public function getType();
+    /**
+     * @param string $type
+     */
+    public function setType($type);
     /**
      * @return string
      */
@@ -78,6 +94,15 @@ interface AuthorizationInterface
      * @param string $ref
      */
     public function setAuthorizationRef($ref);
+    /**
+     * @return string
+     */
+    public function getRequester();
+
+    /**
+     * @param string $requester
+     */
+    public function setRequester($requester);
     /**
      * @return string
      */

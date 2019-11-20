@@ -15,11 +15,11 @@ namespace Mukadi\Wallet\Core;
 interface WalletInterface
 {
     /**
-     * @return decimal
+     * @return double
      */
     public function getBalance();
     /**
-     * @param decimal $balance
+     * @param double $balance
      */
     public function setBalance($balance);
     /**
@@ -49,11 +49,11 @@ interface WalletInterface
     /**
      * @return \DateTime
      */
-    public function getBalancepdatedAt();
+    public function getBalanceUpdatedAt();
     /**
      * @param \DateTime $date
      */
-    public function setBalancepdatedAt($date);
+    public function setBalanceUpdatedAt($date);
     /**
      * @return string
      */
