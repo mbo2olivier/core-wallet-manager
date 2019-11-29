@@ -121,7 +121,19 @@ abstract class AbstractWalletManager
             $op->setDate(new \DateTime('now'));
             $op->setMaker($r->getRequester());
             $op->setType(Codes::OPERATION_TYPE_CASH_OUT);
-            $op->setPlatformId($wallet->getWalletId());
+            $op->setPlatformId($wallet->getPlatformId());
+
+            /** @var OperationInterface $op2 */
+            $op2 = new $class();
+            $op2->setReversal(false);
+            $op2->setAmount($r->getAmount());
+            $op2->setCurrency($r->getCurrency());
+            $op2->setLabel($r->getLabel());
+            $op2->setWalletId($r->getBufferWalletId());
+            $op2->setDate(new \DateTime('now'));
+            $op2->setMaker($r->getRequester());
+            $op2->setType(Codes::OPERATION_TYPE_CASH_IN);
+            $op2->setPlatformId($wallet->getPlatformId());
 
 
             $class = $this->authClass;
@@ -141,7 +153,10 @@ abstract class AbstractWalletManager
             $this->storage->saveAuthorization($auth);
 
             $op->setAuthorizationId($auth->getAuthorizationId());
+            $op2->setAuthorizationId($auth->getAuthorizationId());
+
             $this->execute($op);
+            $this->execute($op2);
 
             return $auth;
         }

@@ -9,7 +9,6 @@
 namespace Mukadi\Wallet\Core\Manager;
 
 use Mukadi\Wallet\Core\Expression\Proxy;
-use Mukadi\Wallet\Core\TransactionInterface;
 use Mukadi\Wallet\Core\OperationInterface;
 use Mukadi\Wallet\Core\Storage\SchemaStorageLayer;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
@@ -19,7 +18,7 @@ use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
  * 
  * @author Olivier M. Mukadi <olivier.m@geniusconception.com>
  */
-class AbstractSchemaManager  
+abstract class AbstractSchemaManager  
 {
     /**
      * @var SchemaStorageLayer
@@ -28,7 +27,7 @@ class AbstractSchemaManager
     /**
      * @var string
      */
-    protected $operatonClass;
+    protected $operationClass;
 
     /**
      * @param SchemaStorageLayer $storage
@@ -36,7 +35,7 @@ class AbstractSchemaManager
      */
     public function __construct(SchemaStorageLayer $storage, $class) {
         $this->storage = $storage;
-        $this->operatonClass = $class;
+        $this->operationClass = $class;
     }
 
     /**
@@ -47,7 +46,7 @@ class AbstractSchemaManager
         /** @var OperationInterface[] $op */
         $ops = [];
         $inst = $this->storage->getInstructions($code);
-        $class = $this->operatonClass;
+        $class = $this->operationClass;
         $exp = new ExpressionLanguage();
         foreach($inst as $i) {
             /** @var OperationInterface $op */

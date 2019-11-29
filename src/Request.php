@@ -38,6 +38,9 @@ class Request
     /** @var  string */
     protected $requester;
 
+    /** @var string $walletId  */
+    protected $bufferWalletId;
+
     /**
      * @return string
      */
@@ -189,5 +192,21 @@ class Request
         $this->authorizationRef = $authorizationRef;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getBufferWalletId()
+    {
+        return $this->bufferWalletId;
+    }
+
+    /**
+     * @param string $bufferWalletId
+     */
+    public function setBufferWalletId($bufferWalletId)
+    {
+        $this->bufferWalletId = $bufferWalletId;
     }
 }
