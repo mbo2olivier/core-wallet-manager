@@ -126,4 +126,12 @@ interface TransactionInterface
      * @param string $note
      */
     public function setNote($note);
+    /**
+     * @return string
+     */
+    public function getBufferWallet();
+    /**
+     * @param string $bufferWallet
+     */
+    public function setBufferWallet($bufferWallet);
 }
