@@ -108,6 +108,16 @@ abstract class AbstractWalletManager
             throw new WalletException("Cannot find targeted wallet with id : ". $r->getWalletId());
         }
 
+        /** @var WalletInterface $buffer */
+        $buffer = $this->storage->findWalletBy(["walletId" => $r->getBufferWalletId()]);
+        if($buffer == null) {
+            throw new WalletException("Cannot find targeted wallet with id : ". $r->getBufferWalletId());
+        }
+
+        if($buffer->getCurrency() !== $r->getCurrency()) {
+            throw new WalletException("Cannot find targeted wallet with id : ". $r->getBufferWalletId());
+        }
+
         $outcome = $wallet->getBalance() - $r->getAmount();
         if($outcome >= 0) {
             $class = $this->opClass;

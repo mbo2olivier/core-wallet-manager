@@ -264,6 +264,66 @@ class AbstractWalletManagerTest extends TestCase {
     }
 
     /** @test */
+    public function testAuthorizeWhenBufferWalletNotFound() {
+        $r = new Request();
+        $r->setCurrency('CDF');
+        $r->setAmount(500);
+        $r->setAuthorizationRef('REF001');
+        $r->setWalletId('W0001');
+        $r->setBufferWalletId('W0002');
+
+        $w = new Wallet();
+        $w->setCurrency('CDF');
+        $w->setBalance(1000);
+
+        $this->storage->method('findWalletBy')->will($this->returnCallback(function($a) use ($w){
+            if($a['walletId'] == 'W0001')
+                return $w;
+            else 
+                return null;
+        }));
+
+        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
+
+        $this->expectException(WalletException::class);
+
+        $manager->authorize($r);
+    }
+
+    /** @test */
+    public function testAuthorizeWhenBufferCurrencyMismatch() {
+        $r = new Request();
+        $r->setCurrency('CDF');
+        $r->setAmount(500);
+        $r->setAuthorizationRef('REF001');
+        $r->setWalletId('W0001');
+        $r->setBufferWalletId('W0002');
+
+        $w = new Wallet();
+        $w->setCurrency('CDF');
+        $w->setBalance(1000);
+
+        $b = new Wallet();
+        $b->setCurrency('USD');
+        $b->setBalance(1000);
+
+        $this->storage->method('findWalletBy')->will($this->returnCallback(function($a) use ($w, $b){
+            if($a['walletId'] == 'W0001')
+                return $w;
+            else if($a['walletId'] == 'W0002')
+                return $b;
+            else 
+                return null;
+        }));
+
+        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
+
+        $this->expectException(WalletException::class);
+
+        $manager->authorize($r);
+    }
+
+    /** @test */
     public function testAuthorizeWhenBalanceInsuffisent() {
         $r = new Request();
         $r->setCurrency('CDF');
