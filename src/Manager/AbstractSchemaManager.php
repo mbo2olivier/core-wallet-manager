@@ -10,6 +10,7 @@ namespace Mukadi\Wallet\Core\Manager;
 
 use Mukadi\Wallet\Core\Expression\Proxy;
 use Mukadi\Wallet\Core\OperationInterface;
+use Mukadi\Wallet\Core\AuthorizationInterface;
 use Mukadi\Wallet\Core\Storage\SchemaStorageLayer;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
@@ -39,19 +40,19 @@ abstract class AbstractSchemaManager
     }
 
     /**
-     * @param string $code
+     * @param AuthorizationInterface $auth
      * @return OperationInterface[]
      */
-    public function getSchemaFor($code) {
+    public function getSchemaFor($auth) {
         /** @var OperationInterface[] $op */
         $ops = [];
-        $inst = $this->storage->getInstructions($code);
+        $inst = $this->storage->getInstructions($auth->getCode());
         $class = $this->operationClass;
         $exp = new ExpressionLanguage();
+        $proxy = new Proxy($auth);
         foreach($inst as $i) {
             /** @var OperationInterface $op */
             $op = new $class();
-            $proxy = new Proxy($i);
             $amount = $exp->evaluate($i->getAmount(),["t" => $proxy,]);
             $currency = $exp->evaluate($i->getCurrency(),["t" => $proxy,]);
             $walletId = $exp->evaluate($i->getWallet(),["t" => $proxy,]);

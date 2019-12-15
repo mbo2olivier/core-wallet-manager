@@ -8,7 +8,7 @@
  */
 namespace Mukadi\Wallet\Core\Manager;
 
-use Mukadi\Wallet\Core\AuthorizationException;
+use Mukadi\Wallet\Core\Exception\AuthorizationException;
 use Mukadi\Wallet\Core\Codes;
 use Mukadi\Wallet\Core\Exception\BalanceException;
 use Mukadi\Wallet\Core\Request;
@@ -150,7 +150,9 @@ abstract class AbstractWalletManager
             $auth->setStatus(Codes::AUTH_STATUS_PENDING);
             $auth->setBalance($outcome);
             $auth->setRequester($r->getRequester());
-            $this->storage->saveAuthorization($auth);
+            $auth->setWalletId($r->getWalletId());
+            $auth->setBufferWalletId($r->getBufferWalletId());
+            $auth = $this->storage->saveAuthorization($auth);
 
             $op->setAuthorizationId($auth->getAuthorizationId());
             $op2->setAuthorizationId($auth->getAuthorizationId());
@@ -185,7 +187,7 @@ abstract class AbstractWalletManager
             throw new AuthorizationException("non debit authorization not allowed");
         }
         $auth = $this->beforeAuthorizationRedemption($auth);
-        $ops = $this->schema->getSchemaFor($auth->getCode());
+        $ops = $this->schema->getSchemaFor($auth);
 
         foreach($ops as $op) {
             $op->setStatus(Codes::OPERATION_STATUS_INIT);
@@ -259,8 +261,10 @@ abstract class AbstractWalletManager
             $this->execute($rop);
         }
 
-        $auth->setStatus(Codes::AUTH_STATUS_REVERSED);
+        $previous->setStatus(Codes::AUTH_STATUS_REVERSED);
+        $auth->setStatus(Codes::AUTH_STATUS_FINALIZED);
         $this->storage->saveAuthorization($auth);
+        $this->storage->saveAuthorization($previous);
 
         return $this->afterAuthorizationReversal($auth);
     }
@@ -305,7 +309,7 @@ abstract class AbstractWalletManager
             $this->storage->saveOperation($op);
             throw new AuthorizationException("unauthorized operation");
         }
-        if($auth->getType() !== Codes::AUTH_STATUS_PENDING) {
+        if($auth->getStatus() !== Codes::AUTH_STATUS_PENDING) {
             $op->setStatus(Codes::OPERATION_STATUS_UNAUTHORIZED);
             $this->storage->saveOperation($op);
             throw new AuthorizationException('operation not allowed for non pending status authorization');

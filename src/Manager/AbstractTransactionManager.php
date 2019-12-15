@@ -21,12 +21,10 @@ use Mukadi\Wallet\Core\TransactionHistoryInterface;
 abstract class AbstractTransactionManager
 {
     protected $storage;
-    protected $wm;
     protected $hClass;
 
-    public function __construct(AbstractWalletManager $wm, TransactionStorageLayer $storage, $historyClass) {
+    public function __construct(TransactionStorageLayer $storage, $historyClass) {
         $this->storage = $storage;
-        $this->wm = $wm;
         $this->hClass = $historyClass;
     }
 
@@ -63,7 +61,7 @@ abstract class AbstractTransactionManager
         $tx->setEndedAt(new \DateTime('now'));
         $tx = $this->storage->saveTransaction($tx);
         $this->capture($tx);
-        $this->afterClose($tx);
+        return $this->afterClose($tx);
     }
 
     protected function capture(TransactionInterface $tx) {

@@ -6,7 +6,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Mukadi\Wallet\Core;
+namespace Mukadi\Wallet\Core\Exception;
 /**
  * Class AuthorizationException.
  * 

@@ -23,11 +23,23 @@ class Proxy
 
     public  function __get($name) {
         $getter = "get".ucfirst($name);
-        return $this->subject->$getter();
+        if(method_exists($this->subject, $getter)) {
+            return $this->subject->$getter();
+        }
+        else
+            throw new \BadMethodCallException(
+                "Undefined method '$getter'"
+            );
     }
 
     public function __set($name, $value) {
         $setter = "set".ucfirst($name);
-        $this->subject->$setter($value);
+        if(method_exists($this->subject, $setter)) {
+            $this->subject->$setter($value);
+        }
+        else
+            throw new \BadMethodCallException(
+                "Undefined method '$setter'"
+            );
     }
 }
