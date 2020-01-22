@@ -29,6 +29,10 @@ abstract class AbstractSchemaManager
      * @var string
      */
     protected $operationClass;
+    /** 
+     * @var ExpressionLanguage
+     */
+    protected $exp;
 
     /**
      * @param SchemaStorageLayer $storage
@@ -37,6 +41,13 @@ abstract class AbstractSchemaManager
     public function __construct(SchemaStorageLayer $storage, $class) {
         $this->storage = $storage;
         $this->operationClass = $class;
+        $this->exp = new ExpressionLanguage();
+    }
+
+    public function registerFx($name, callable $fx) {
+        $this->exp->register($name, $fx, $fx);
+        
+        return $this;
     }
 
     /**
@@ -48,16 +59,16 @@ abstract class AbstractSchemaManager
         $ops = [];
         $inst = $this->storage->getInstructions($auth->getCode());
         $class = $this->operationClass;
-        $exp = new ExpressionLanguage();
         $proxy = new Proxy($auth);
+        $iargs = ["t" => $proxy,];
         foreach($inst as $i) {
             /** @var OperationInterface $op */
             $op = new $class();
-            $amount = $exp->evaluate($i->getAmount(),["t" => $proxy,]);
-            $currency = $exp->evaluate($i->getCurrency(),["t" => $proxy,]);
-            $walletId = $exp->evaluate($i->getWallet(),["t" => $proxy,]);
-            $label = $exp->evaluate($i->getLabel(),["t" => $proxy,]);
-            $direction = $exp->evaluate($i->getDirection(),["t" => $proxy,]);
+            $amount = $this->exp->evaluate($i->getAmount(),$iargs);
+            $currency = $this->exp->evaluate($i->getCurrency(),$iargs);
+            $walletId = $this->exp->evaluate($i->getWallet(),$iargs);
+            $label = $this->exp->evaluate($i->getLabel(),$iargs);
+            $direction = $this->exp->evaluate($i->getDirection(),$iargs);
 
             $op->setAmount($amount);
             $op->setCurrency($currency);
