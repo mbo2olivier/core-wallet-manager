@@ -17,7 +17,7 @@ class AbstractSchemaManagerTest extends TestCase {
         // authorization
         $auth = $this
             ->getMockBuilder(AuthorizationInterface::class)
-            ->setMethods(['getAmount','getCurrency','getType','getBalance','setBalance','setAmount','setCurrency','getCode','setCode','setType','getAuthorizationId','setAuthorizationId','getStatus','setStatus','getWalletId','setWalletId','getBufferWalletId','setBufferWalletId','getChannelId','setChannelId','getAuthorizationRef','setAuthorizationRef','getRequester','setRequester','getPlatformId','setPlatformId'])
+            ->setMethods(['getAmount','getCurrency','getType','getBalance','setBalance','setAmount','setCurrency','getCode','setCode','setType','getAuthorizationId','setAuthorizationId','getStatus','setStatus','getWalletId','setWalletId','getBufferWalletId','setBufferWalletId','getChannelId','setChannelId','getAuthorizationRef','setAuthorizationRef','getRequester','setRequester','getPlatformId','setPlatformId','getData1','setData1','getData2','setData2','getData3','setData3','getData4','setData4','getData5','setData5','getData6','setData6'])
             ->getMock()
         ;
         $auth->method('getAmount')->willReturn(10);

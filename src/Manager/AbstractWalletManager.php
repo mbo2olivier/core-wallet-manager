@@ -162,6 +162,12 @@ abstract class AbstractWalletManager
             $auth->setRequester($r->getRequester());
             $auth->setWalletId($r->getWalletId());
             $auth->setBufferWalletId($r->getBufferWalletId());
+            $auth->setData1($r->getData1());
+            $auth->setData2($r->getData2());
+            $auth->setData3($r->getData3());
+            $auth->setData4($r->getData4());
+            $auth->setData5($r->getData5());
+            $auth->setData6($r->getData6());
             $auth = $this->storage->saveAuthorization($auth);
 
             $op->setAuthorizationId($auth->getAuthorizationId());

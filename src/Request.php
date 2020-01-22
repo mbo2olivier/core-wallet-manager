@@ -41,6 +41,24 @@ class Request
     /** @var string $walletId  */
     protected $bufferWalletId;
 
+    /** @var  string */
+    protected $data1;
+
+    /** @var  string */
+    protected $data2;
+
+    /** @var  string */
+    protected $data3;
+
+    /** @var  string */
+    protected $data4;
+
+    /** @var  string */
+    protected $data5;
+
+    /** @var  string */
+    protected $data6;
+
     /**
      * @return string
      */
@@ -208,5 +226,125 @@ class Request
     public function setBufferWalletId($bufferWalletId)
     {
         $this->bufferWalletId = $bufferWalletId;
+    }
+
+    /**
+     * Get the value of data1
+     */ 
+    public function getData1()
+    {
+        return $this->data1;
+    }
+
+    /**
+     * Set the value of data1
+     *
+     * @return  self
+     */ 
+    public function setData1($data1)
+    {
+        $this->data1 = $data1;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of data2
+     */ 
+    public function getData2()
+    {
+        return $this->data2;
+    }
+
+    /**
+     * Set the value of data2
+     *
+     * @return  self
+     */ 
+    public function setData2($data2)
+    {
+        $this->data2 = $data2;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of data3
+     */ 
+    public function getData3()
+    {
+        return $this->data3;
+    }
+
+    /**
+     * Set the value of data3
+     *
+     * @return  self
+     */ 
+    public function setData3($data3)
+    {
+        $this->data3 = $data3;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of data4
+     */ 
+    public function getData4()
+    {
+        return $this->data4;
+    }
+
+    /**
+     * Set the value of data4
+     *
+     * @return  self
+     */ 
+    public function setData4($data4)
+    {
+        $this->data4 = $data4;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of data5
+     */ 
+    public function getData5()
+    {
+        return $this->data5;
+    }
+
+    /**
+     * Set the value of data5
+     *
+     * @return  self
+     */ 
+    public function setData5($data5)
+    {
+        $this->data5 = $data5;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of data6
+     */ 
+    public function getData6()
+    {
+        return $this->data6;
+    }
+
+    /**
+     * Set the value of data6
+     *
+     * @return  self
+     */ 
+    public function setData6($data6)
+    {
+        $this->data6 = $data6;
+
+        return $this;
     }
 }

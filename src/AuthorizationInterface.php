@@ -119,4 +119,70 @@ interface AuthorizationInterface
      * @param string $pif
      */
     public function setPlatformId($pif);
+    /**
+     * Get the value of data1
+     */ 
+    public function getData1();
+    /**
+     * Set the value of data1
+     *
+     * @return  self
+     */ 
+    public function setData1($data1);
+    /**
+     * Get the value of data2
+     */ 
+    public function getData2();
+    /**
+     * Set the value of data2
+     *
+     * @return  self
+     */ 
+    public function setData2($data2);
+
+    /**
+     * Get the value of data3
+     */ 
+    public function getData3();
+
+    /**
+     * Set the value of data3
+     *
+     * @return  self
+     */ 
+    public function setData3($data3);
+    /**
+     * Get the value of data4
+     */ 
+    public function getData4();
+
+    /**
+     * Set the value of data4
+     *
+     * @return  self
+     */ 
+    public function setData4($data4);
+
+    /**
+     * Get the value of data5
+     */ 
+    public function getData5();
+
+    /**
+     * Set the value of data5
+     *
+     * @return  self
+     */ 
+    public function setData5($data5);
+
+    /**
+     * Get the value of data6
+     */ 
+    public function getData6();
+    /**
+     * Set the value of data6
+     *
+     * @return  self
+     */ 
+    public function setData6($data6);
 }
