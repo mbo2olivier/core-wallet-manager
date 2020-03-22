@@ -332,6 +332,7 @@ class AbstractWalletManagerTest extends TestCase {
         $w = new Wallet();
         $w->setCurrency('CDF');
         $w->setBalance(1000);
+        $w->setOverdraft(0);
 
         $this->storage->method('findWalletBy')->willReturn($w);
 
@@ -353,7 +354,8 @@ class AbstractWalletManagerTest extends TestCase {
 
         $w = new Wallet();
         $w->setCurrency('CDF');
-        $w->setBalance(1000);
+        $w->setBalance(0);
+        $w->setOverdraft(500);
 
         $b = new Wallet();
         $b->setCurrency('CDF');
@@ -379,7 +381,7 @@ class AbstractWalletManagerTest extends TestCase {
         $this->assertEquals('REF001', $auth->getAuthorizationRef());
         $this->assertEquals('A0001', $auth->getAuthorizationId());
         $this->assertEquals(Codes::AUTH_STATUS_PENDING, $auth->getStatus());
-        $this->assertEquals(500, $w->getBalance());
+        $this->assertEquals(-500, $w->getBalance());
         $this->assertEquals(1500, $b->getBalance());
 
     }

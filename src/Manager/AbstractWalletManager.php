@@ -119,7 +119,7 @@ abstract class AbstractWalletManager
         }
 
         $outcome = $wallet->getBalance() - $r->getAmount();
-        if($outcome >= 0) {
+        if($outcome + $wallet->getOverdraft() >= 0) {
             $class = $this->opClass;
             /** @var OperationInterface $op */
             $op = new $class();

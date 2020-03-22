@@ -110,4 +110,12 @@ interface WalletInterface
      * @param string $pif
      */
     public function setPlatformId($pif);
+    /**
+     * @return double
+     */
+    public function getOverdraft();
+    /**
+     * @param double $overdraft
+     */
+    public function setOverdraft($overdraft);
 }
