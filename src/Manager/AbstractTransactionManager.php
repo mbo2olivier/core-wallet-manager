@@ -46,7 +46,7 @@ abstract class AbstractTransactionManager
         return $this->afterOpen($tx);
     }
 
-    public function close($txId) {
+    public function close($txId, $status = Codes::TX_STATUS_CANCELED) {
         $tx = $this->storage->findTransactionBy(['transactionId' => $txId]);
         if($tx == null) {
             throw new TransactionException("cannot find transaction with id: " . $txId);
@@ -56,8 +56,12 @@ abstract class AbstractTransactionManager
             throw new TransactionException("Transaction already closed");
         }
 
+        if(!in_array($status, [Codes::TX_STATUS_CANCELED, Codes::TX_STATUS_TERMINATED])) {
+            throw new TransactionException(sprintf("'%s' is not a valid transaction status", $status));
+        }
+
         $tx = $this->beforeClose($tx);
-        $tx->setStatus(Codes::TX_STATUS_CANCELED);
+        $tx->setStatus($status);
         $tx->setEndedAt(new \DateTime('now'));
         $tx = $this->storage->saveTransaction($tx);
         $this->capture($tx);

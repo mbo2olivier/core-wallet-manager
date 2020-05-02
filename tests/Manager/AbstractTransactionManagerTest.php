@@ -59,6 +59,18 @@ class AbstractTransactionManagerTest extends TestCase {
         $this->manager->close('TX001');
     }
 
+    public function testCloseWrongStatus() {
+        $tx = new Transaction();
+        $tx->setStatus(Codes::TX_STATUS_OPENED);
+        $this
+            ->storage
+            ->method('findTransactionBy')->willReturn($tx);
+        ;
+        $this->expectException(TransactionException::class);
+
+        $this->manager->close('TX001','F');
+    }
+
     public function testClose() {
         $tx = new Transaction();
         $tx->setStatus(Codes::TX_STATUS_OPENED);
