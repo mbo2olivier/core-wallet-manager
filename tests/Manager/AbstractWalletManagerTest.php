@@ -264,178 +264,20 @@ class AbstractWalletManagerTest extends TestCase {
     }
 
     /** @test */
-    public function testAuthorizeWhenBufferWalletNotFound() {
-        $r = new Request();
-        $r->setCurrency('CDF');
-        $r->setAmount(500);
-        $r->setAuthorizationRef('REF001');
-        $r->setWalletId('W0001');
-        $r->setBufferWalletId('W0002');
-
-        $w = new Wallet();
-        $w->setCurrency('CDF');
-        $w->setBalance(1000);
-
-        $this->storage->method('findWalletBy')->will($this->returnCallback(function($a) use ($w){
-            if($a['walletId'] == 'W0001')
-                return $w;
-            else 
-                return null;
-        }));
-
-        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
-
-        $this->expectException(WalletException::class);
-
-        $manager->authorize($r);
-    }
-
-    /** @test */
-    public function testAuthorizeWhenBufferCurrencyMismatch() {
-        $r = new Request();
-        $r->setCurrency('CDF');
-        $r->setAmount(500);
-        $r->setAuthorizationRef('REF001');
-        $r->setWalletId('W0001');
-        $r->setBufferWalletId('W0002');
-
-        $w = new Wallet();
-        $w->setCurrency('CDF');
-        $w->setBalance(1000);
-
-        $b = new Wallet();
-        $b->setCurrency('USD');
-        $b->setBalance(1000);
-
-        $this->storage->method('findWalletBy')->will($this->returnCallback(function($a) use ($w, $b){
-            if($a['walletId'] == 'W0001')
-                return $w;
-            else if($a['walletId'] == 'W0002')
-                return $b;
-            else 
-                return null;
-        }));
-
-        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
-
-        $this->expectException(WalletException::class);
-
-        $manager->authorize($r);
-    }
-
-    /** @test */
-    public function testAuthorizeWhenBalanceInsuffisent() {
-        $r = new Request();
-        $r->setCurrency('CDF');
-        $r->setAmount(2000);
-
-        $w = new Wallet();
-        $w->setCurrency('CDF');
-        $w->setBalance(1000);
-        $w->setOverdraft(0);
-
-        $this->storage->method('findWalletBy')->willReturn($w);
-
-        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
-
-        $this->expectException(BalanceException::class);
-
-        $manager->authorize($r);
-    }
-
-    /** @test */
     public function testAuthorize() {
         $r = new Request();
         $r->setCurrency('CDF');
-        $r->setAmount(500);
+        $r->setAmount(1000);
+        $r->setCode('CODE');
         $r->setAuthorizationRef('REF001');
-        $r->setWalletId('W0001');
-        $r->setBufferWalletId('W0002');
-
-        $w = new Wallet();
-        $w->setCurrency('CDF');
-        $w->setBalance(0);
-        $w->setOverdraft(500);
-
-        $b = new Wallet();
-        $b->setCurrency('CDF');
-        $b->setBalance(1000);
-
-        $_auth = new Authorization();
-        $_auth->setStatus(Codes::AUTH_STATUS_PENDING);        
-
-        $this->storage->method('findWalletBy')->will($this->returnCallback(function ($a) use ($w, $b) {
-            return $a['walletId'] == 'W0001' ? $w : $b;
-        }));
-        $this->storage->method('saveAuthorization')->will($this->returnCallback(function ($a) {
-            return $a;
-        }));
-        $this->storage->method('findAuthorizationBy')->willReturn($_auth);
-
-        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
-
-        $auth = $manager->authorize($r);
-
-        $this->assertEquals(500, $auth->getAmount());
-        $this->assertEquals('CDF', $auth->getCurrency());
-        $this->assertEquals('REF001', $auth->getAuthorizationRef());
-        $this->assertEquals('A0001', $auth->getAuthorizationId());
-        $this->assertEquals(Codes::AUTH_STATUS_PENDING, $auth->getStatus());
-        $this->assertEquals(-500, $w->getBalance());
-        $this->assertEquals(1500, $b->getBalance());
-
-    }
-
-    public function testAuthorizationRedemptionWhenAuthNotFound() {
-        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
-
-        $this->expectException(AuthorizationException::class);
-
-        $manager->authorizationRedemption("A0001");
-    }
-
-    public function testAuthorizationRedemptionWhenAuthNotPending() {
-        $auth = new Authorization();
-        $auth->setStatus(Codes::AUTH_STATUS_FINALIZED);
-
-        $this->storage->method('findAuthorizationBy')->willReturn($auth);
-        
-        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
-
-        $this->expectException(AuthorizationException::class);
-
-        $manager->authorizationRedemption("A0001");
-    }
-
-    public function testAuthorizationRedemptionWhenAuthNotDebit() {
-        $auth = new Authorization();
-        $auth->setStatus(Codes::AUTH_STATUS_PENDING);
-        $auth->setType(Codes::AUTH_TYPE_REVERSE);
-
-        $this->storage->method('findAuthorizationBy')->willReturn($auth);
-        
-        $manager = new WalletManager($this->schema, $this->storage, Authorization::class, Operation::class);
-
-        $this->expectException(AuthorizationException::class);
-
-        $manager->authorizationRedemption("A0001");
-    }
-
-    public function testAuthorizationRedemption() {
-        $auth = new Authorization;
-        $auth->setStatus(Codes::AUTH_STATUS_PENDING);
-        $auth->setType(Codes::AUTH_TYPE_DEBIT);
-        $auth->setAmount(1000);
-        $auth->setCurrency('CDF');
-        $auth->setCode('CODE');
-        $auth->setAuthorizationId('A0001');
-        $auth->setAuthorizationRef('REF01');
-        $auth->setWalletId('W001');
-        $auth->setBufferWalletId('W002');
+        $r->setWalletId('W001');
+        $r->setLabel('ceci est un test');
+        $r->setChannelId('MOBILE');
+        $r->setRequester('mbo2');
 
         $w = new Wallet;
         $w->setWalletId('W001');
-        $w->setBalance(500);
+        $w->setBalance(1500);
         $w->setCurrency('CDF');
 
         $b = new Wallet;
@@ -453,6 +295,8 @@ class AbstractWalletManagerTest extends TestCase {
         $d->setBalance(50);
         $d->setCurrency('CDF');
 
+        $auth = null;
+
         $this->storage->method('findWalletBy')->will($this->returnCallback(function ($a) use ($w, $b, $p, $d) {
             if($a['walletId'] == 'W001')
                 return $w;
@@ -465,10 +309,12 @@ class AbstractWalletManagerTest extends TestCase {
             else
                 return null;     
         }));
-        $this->storage->method('saveAuthorization')->will($this->returnCallback(function ($a) {
+        $storage = $this->storage;
+        $this->storage->method('saveAuthorization')->will($this->returnCallback(function ($a)  use(&$storage) {
+            $storage->method('findAuthorizationBy')->willReturn($a);
             return $a;
         }));
-        $this->storage->method('findAuthorizationBy')->willReturn($auth);
+        //$this->
 
         $iStorage = $this
             ->getMockBuilder(SchemaStorageLayer::class)
@@ -477,21 +323,32 @@ class AbstractWalletManagerTest extends TestCase {
         ;
 
         $iStorage->method('getInstructions')->willReturn([
-            new Instruction('t.amount','t.currency','"D"','"foo bar 1"',0,'S001','t.bufferWalletId'),
+            new Instruction('t.amount','t.currency','"D"','t.label',0,'S001','t.walletId'),
             new Instruction('t.amount * 0.95','t.currency','"C"','"foo bar 2"',1,'S001','"W004"'),
             new Instruction('t.amount * 0.05','t.currency','"C"','"foo bar 3"',2,'S001','"W003"'),
         ]);
         
         $manager = new WalletManager(new SchemaManager($iStorage, Operation::class), $this->storage, Authorization::class, Operation::class);
 
-        $auth = $manager->authorizationRedemption("A0001");
+        /** @var \Mukadi\Wallet\Core\AuthorizationInterface $auth */
+        $auth = $manager->authorize($r);
 
+        $this->assertEquals(1000, $auth->getAmount());
+        $this->assertEquals('CDF', $auth->getCurrency());
+        $this->assertEquals('REF001', $auth->getAuthorizationRef());
+        $this->assertEquals('A0001', $auth->getAuthorizationId());
+        $this->assertEquals('ceci est un test', $auth->getLabel());
+        $this->assertEquals('MOBILE', $auth->getChannelId());
+        
+        
         $this->assertEquals(Codes::AUTH_STATUS_FINALIZED, $auth->getStatus());
         $this->assertEquals(500, $w->getBalance());
-        $this->assertEquals(0, $b->getBalance());
+        $this->assertEquals(1000, $b->getBalance());
         $this->assertEquals(1000, $d->getBalance());
         $this->assertEquals(50, $p->getBalance());
+
     }
+
 
     public function testAuthorizationReversalWhenAuthNotFound() {
         $r = new Reversal;

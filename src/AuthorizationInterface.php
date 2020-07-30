@@ -81,14 +81,6 @@ interface AuthorizationInterface
     /**
      * @return string
      */
-    public function getBufferWalletId();
-    /**
-     * @param string $bufferWalletId
-     */
-    public function setBufferWalletId($bufferWalletId);
-    /**
-     * @return string
-     */
     public function getChannelId();
     /**
      * @param string $id
@@ -111,6 +103,15 @@ interface AuthorizationInterface
      * @param string $requester
      */
     public function setRequester($requester);
+    /**
+     * @return string
+     */
+    public function getLabel();
+
+    /**
+     * @param string $label
+     */
+    public function setLabel($label);
     /**
      * @return string
      */

@@ -52,6 +52,25 @@ class Authorization  implements AuthorizationInterface
     /** @var  string */
     protected $data6;
 
+    /** @var  string */
+    protected $label;
+
+    /**
+     * @return string
+     */
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
+    /**
+     * @param string $label
+     */
+    public function setLabel($label)
+    {
+        $this->label = $label;
+    }
+
     /**
      * @return int
      */

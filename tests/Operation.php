@@ -224,7 +224,7 @@ class Operation  implements OperationInterface
      */
     public function isReversal()
     {
-        return $this->$reversal;
+        return $this->reversal;
     }
 
     /**

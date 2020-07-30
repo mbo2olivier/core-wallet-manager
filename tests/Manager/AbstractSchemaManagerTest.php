@@ -21,7 +21,7 @@ class AbstractSchemaManagerTest extends TestCase {
         // authorization
         $this->auth = $this
             ->getMockBuilder(AuthorizationInterface::class)
-            ->setMethods(['getAmount','getCurrency','getType','getBalance','setBalance','setAmount','setCurrency','getCode','setCode','setType','getAuthorizationId','setAuthorizationId','getStatus','setStatus','getWalletId','setWalletId','getBufferWalletId','setBufferWalletId','getChannelId','setChannelId','getAuthorizationRef','setAuthorizationRef','getRequester','setRequester','getPlatformId','setPlatformId','getData1','setData1','getData2','setData2','getData3','setData3','getData4','setData4','getData5','setData5','getData6','setData6'])
+            ->setMethods(['getLabel','setLabel','getAmount','getCurrency','getType','getBalance','setBalance','setAmount','setCurrency','getCode','setCode','setType','getAuthorizationId','setAuthorizationId','getStatus','setStatus','getWalletId','setWalletId','getBufferWalletId','setBufferWalletId','getChannelId','setChannelId','getAuthorizationRef','setAuthorizationRef','getRequester','setRequester','getPlatformId','setPlatformId','getData1','setData1','getData2','setData2','getData3','setData3','getData4','setData4','getData5','setData5','getData6','setData6'])
             ->getMock()
         ;
         $this->auth->method('getData1')->willReturn("MBOMBO");
@@ -41,6 +41,7 @@ class AbstractSchemaManagerTest extends TestCase {
         $instruction->method('getLabel')->willReturn('upper("hello ") ~ t.data1');
         $instruction->method('getDirection')->willReturn('"D"');
 
+        /** @var Mukadi\Wallet\Core\Storage\SchemaStorageLayer $storage */
         $storage = $this
             ->getMockBuilder(SchemaStorageLayer::class)
             ->setMethods(['getInstructions'])

@@ -25,10 +25,6 @@ class Codes
     const OPERATION_STATUS_UNAUTHORIZED = "U";
     const OPERATION_STATUS_ERROR = "E";
 
-    const TX_STATUS_OPENED = "O";
-    const TX_STATUS_CANCELED = "C";
-    const TX_STATUS_TERMINATED = "T";
-
     const AUTH_STATUS_PENDING = "P";
     const AUTH_STATUS_FINALIZED = "F";
     const AUTH_STATUS_REVERSED = "R";
