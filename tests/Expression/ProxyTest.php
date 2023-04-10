@@ -3,28 +3,27 @@ namespace Mukadi\Wallet\Core\Test\Expression;
 
 use PHPUnit\Framework\TestCase;
 use Mukadi\Wallet\Core\Expression\Proxy;
-use Mukadi\Wallet\Core\Request;
+use Mukadi\Wallet\Core\Test\Payment;
 
 class ProxyTest extends TestCase {
 
     public function testSetMethod() {
-        $r = new Request();
+        $r = new Payment();
         $proxy = new Proxy($r);
-        $proxy->code = "foo";
+        $proxy->operationCode = "SCHM02";
 
-        $this->assertEquals($r->getCode(),'foo');
+        $this->assertEquals($r->getOperationCode(),'SCHM02');
     }
 
     public function testGetMethod() {
-        $r = new Request();
-        $r->setCode('foo');
+        $r = new Payment("SCHM02");
         $proxy = new Proxy($r);
 
-        $this->assertEquals($proxy->code,'foo');
+        $this->assertEquals($proxy->operationCode,'SCHM02');
     }
 
     public function testSetMethodException() {
-        $r = new Request();
+        $r = new Payment();
         $proxy = new Proxy($r);
 
         $this->expectException(\BadMethodCallException::class);
@@ -33,8 +32,8 @@ class ProxyTest extends TestCase {
     }
 
     public function testGetMethodException() {
-        $r = new Request();
-        $r->setCode('foo');
+        $r = new Payment();
+        $r->setOperationCode('foo');
         $proxy = new Proxy($r);
 
         $this->expectException(\BadMethodCallException::class);

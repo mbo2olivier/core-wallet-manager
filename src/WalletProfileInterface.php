@@ -8,34 +8,34 @@
  */
 namespace Mukadi\Wallet\Core;
 /**
- * Interface RequestTypeInterface.
+ * Interface WalletProfileInterface.
  * 
  * @author Olivier M. Mukadi <olivier.m@geniusconception.com>
  */
-interface RequestTypeInterface
+interface WalletProfileInterface
 {
     /**
      * @return string
      */
-    public function getCode();
+    public function getCode(): string;
     /**
      * @param string $code
      */
-    public function setCode($code);
+    public function setCode(string $code);
     /**
      * @return string
      */
-    public function getLabel();
+    public function getLabel(): string;
     /**
      * @param string $label
      */
-    public function setLabel($label);
+    public function setLabel(string $label);
     /**
      * @return string
      */
-    public function getPlatformId();
+    public function getPlatformId(): string;
     /**
      * @param string $pif
      */
-    public function setPlatformId($pif);
+    public function setPlatformId(string $pif);
 }

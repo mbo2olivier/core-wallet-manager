@@ -8,27 +8,27 @@
  */
 namespace Mukadi\Wallet\Core\Exception;
 
-use Mukadi\Wallet\Core\OperationInterface;
+use Mukadi\Wallet\Core\EntryInterface;
 /**
- * Class OperationException.
+ * Class EntryException.
  * 
  * @author Olivier M. Mukadi <olivier.m@geniusconception.com>
  */
-class OperationException extends \Exception 
+class EntryException extends \Exception 
 {
-    /** @var OperationInterface $operation */
-    protected $operation;
+    /** @var EntryInterface|null $operation */
+    protected ?EntryInterface $operation;
 
-    public function __construct($message, OperationInterface $operation = null) {
+    public function __construct($message, EntryInterface $operation = null) {
         parent::__construct($message);
         $this->operation = $operation;
     }
 
     /**
      * Get the value of operation
-     * @return OperationInterface
+     * @return EntryInterface
      */ 
-    public function getOperation()
+    public function getOperation(): ?EntryInterface
     {
         return $this->operation;
     }

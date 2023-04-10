@@ -17,121 +17,121 @@ interface HolderInterface {
     /**
      * @return string
      */
-    public function getHolderId();
+    public function getHolderId(): string;
     /**
      * @param string $holder
      */
-    public function setHolderId($holder);
+    public function setHolderId(string $holder);
     /**
      * @return string
      */
-    public function getFirstName();
+    public function getFirstName(): ?string;
     /**
      * @param string $name
      */
-    public function setFirstName($name);
+    public function setFirstName(?string $name);
     /**
      * @return string
      */
-    public function getLastName();
+    public function getLastName(): ?string;
     /**
      * @param string $name
      */
-    public function setLastName($name);
+    public function setLastName(?string $name);
     /**
-     * @return \DateTime
+     * @return \DateTimeImmutable
      */
-    public function getCreatedAt();
+    public function getCreatedAt(): \DateTimeImmutable;
     /**
-     * @param \DateTime $date
+     * @param \DateTDateTimeImmutableime $date
      */
-    public function setCreatedAt($date);
+    public function setCreatedAt(\DateTimeImmutable $date);
     /**
-     * @return \DateTime
+     * @return ?\DateTimeImmutable
      */
-    public function getUpdatedAt();
+    public function getUpdatedAt(): ?\DateTimeImmutable;
     /**
-     * @param \DateTime $date
+     * @param ?\DateTime $date
      */
-    public function setUpdatedAt($date);
+    public function setUpdatedAt(?\DateTimeImmutable $date);
     /**
      * @return string
      */
-    public function getAddress();
+    public function getAddress(): ?string;
     /**
      * @param string $address
      */
-    public function setAddress($address);
+    public function setAddress(?string $address);
     /**
      * @return string
      */
-    public function getCountry();
+    public function getCountry(): ?string;
     /**
      * @param string $country
      */
-    public function setCountry($country);
+    public function setCountry(?string $country);
     /**
      * @return string
      */
-    public function getState();
+    public function getState(): ?string;
     /**
      * @param string $state
      */
-    public function setState($state);
+    public function setState(?string $state);
     /**
      * @return string
      */
-    public function getPhone();
+    public function getPhone(): ?string;
     /**
      * @param string $phone
      */
-    public function setPhone($phone);
+    public function setPhone(?string $phone);
     /**
      * @return string
      */
-    public function getPhone2();
+    public function getPhone2(): ?string;
     /**
      * @param string $phone
      */
-    public function setPhone2($phone);
+    public function setPhone2(?string $phone);
     /**
      * @return string
      */
-    public function getRegistrationDoc();
+    public function getRegistrationDoc(): ?string;
     /**
      * @param string $doc
      */
-    public function setRegistrationDoc($doc);
+    public function setRegistrationDoc(?string $doc);
     /**
      * @return string
      */
-    public function getRegistrationDocId();
+    public function getRegistrationDocId(): ?string;
     /**
      * @param string $id
      */
-    public function setRegistrationDocId($id);
+    public function setRegistrationDocId(?string $id);
     /**
      * @return string
      */
-    public function getProfilId();
+    public function getProfilId(): ?string;
     /**
      * @param string $id
      */
-    public function setProfilId($id);
+    public function setProfilId(?string $id);
     /**
      * @return string
      */
-    public function getEmail();
+    public function getEmail(): ?string;
     /**
      * @param string $email
      */
-    public function setEmail($email);
+    public function setEmail(?string $email);
     /**
      * @return string
      */
-    public function getPlatformId();
+    public function getPlatformId(): string;
     /**
      * @param string $pif
      */
-    public function setPlatformId($pif);
+    public function setPlatformId(string $pif);
 }

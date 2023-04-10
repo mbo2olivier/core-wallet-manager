@@ -5,404 +5,184 @@ use Mukadi\Wallet\Core\AuthorizationInterface;
 
 class Authorization  implements AuthorizationInterface
 {
-    /** @var  integer */
-    protected $id;
+    /** @var  \DateTimeImmutable */
+    protected \DateTimeImmutable $date;
+
+    /** @var  string */
+    protected null|string $description;
+
+    /** @var  string */
+    protected string $authorizationId;
+
+    /** @var  string */
+    protected null|string $operationId;
+
+    /** @var  string */
+    protected ?string $operationCode;
+
+    /** @var  string */
+    protected string $status;
+
+    /** @var  null|string */
+    protected ?string $instrumentId;
+
+    /** @var  null|string */
+    protected ?string $holderId;
+
+    /** @var  string */
+    protected ?string $platformId;
+
+    /** @var  null|string */
+    protected ?string $encoder;
+
+    /** @var  null|string */
+    protected ?string $validator;
+
+    /** @var  null|\DateTimeImmutable */
+    protected ?\DateTimeImmutable $encodedAt;
+
+    /** @var  null|\DateTimeImmutable */
+    protected ?\DateTimeImmutable $validatedAt;
+
+    /** @var  string */
+    protected string $schemaId;
+
     /** @var  double */
-    protected $amount;
-    /** @var  string */
-    protected $authorizationId;
-    /** @var  string */
-    protected $authorizationRef;
-    /** @var  double */
-    protected $balance;
-    /** @var  string */
-    protected $channelId;
-    /** @var  string */
-    protected $code;
+    protected $transactionAmount;
+
     /** @var  string */
     protected $currency;
-    /** @var  string */
-    protected $platformId;
-    /** @var  string */
-    protected $requester;
-    /** @var  string */
-    protected $status;
-    /** @var  string */
-    protected $type;
-    /** @var  string */
-    protected $walletId;
-    /** @var  string */
-    protected $bufferWalletId;
+
+    /** @var  double */
+    protected $commissionAmount;
 
     /** @var  string */
-    protected $data1;
+    protected string $commissionCurrency;
 
     /** @var  string */
-    protected $data2;
+    protected string $authorizationRequestId;
 
-    /** @var  string */
-    protected $data3;
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getDate(): \DateTimeImmutable { return $this->date; }
+    /**
+     * @param \DateTimeImmutable $date
+     */
+    public function setDate(\DateTimeImmutable $date) { $this->date = $date; }
 
-    /** @var  string */
-    protected $data4;
+    /**
+     * @return string|null
+     */
+    public function getDescription(): ?string { return $this->description; }
+    /**
+     * @param string|null $descr
+     */
+    public function setDescription(?string $descr) { $this->description = $descr; }
 
-    /** @var  string */
-    protected $data5;
-
-    /** @var  string */
-    protected $data6;
-
-    /** @var  string */
-    protected $label;
-
+    /**
+     * @return string|null
+     */
+    public function getOperationCode(): ?string { return $this->operationCode; }
+    /**
+     * @param string|null $code
+     */
+    public function setOperationCode(?string $code) { $this->operationCode = $code; }
+    /**
+     * @return string|null
+     */
+    public function getOperationId(): ?string { return $this->operationId; }
+    /**
+     * @param string|null $id
+     */
+    public function setOperationId(?string $id) { $this->operationId = $id; }
     /**
      * @return string
      */
-    public function getLabel()
-    {
-        return $this->label;
-    }
-
+    public function getAuthorizationId(): string { return $this->authorizationId; }
     /**
-     * @param string $label
+     * @param string $id
      */
-    public function setLabel($label)
-    {
-        $this->label = $label;
-    }
-
-    /**
-     * @return int
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @return float
-     */
-    public function getAmount()
-    {
-        return $this->amount;
-    }
-
-    /**
-     * @param float $amount
-     */
-    public function setAmount($amount)
-    {
-        $this->amount = $amount;
-    }
-
+    public function setAuthorizationId(string $id) { $this->authorizationId = $id; }
     /**
      * @return string
      */
-    public function getRequester()
-    {
-        return $this->requester;
-    }
-
-    /**
-     * @param string $requester
-     */
-    public function setRequester($requester)
-    {
-        $this->requester = $requester;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAuthorizationId()
-    {
-        return $this->authorizationId;
-    }
-
-    /**
-     * @param string $authorizationId
-     */
-    public function setAuthorizationId($authorizationId)
-    {
-        $this->authorizationId = $authorizationId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAuthorizationRef()
-    {
-        return $this->authorizationRef;
-    }
-
-    /**
-     * @param string $authorizationRef
-     */
-    public function setAuthorizationRef($authorizationRef)
-    {
-        $this->authorizationRef = $authorizationRef;
-    }
-
-    /**
-     * @return float
-     */
-    public function getBalance()
-    {
-        return $this->balance;
-    }
-
-    /**
-     * @param float $balance
-     */
-    public function setBalance($balance)
-    {
-        $this->balance = $balance;
-    }
-
-    /**
-     * @return string
-     */
-    public function getChannelId()
-    {
-        return $this->channelId;
-    }
-
-    /**
-     * @param string $channelId
-     */
-    public function setChannelId($channelId)
-    {
-        $this->channelId = $channelId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCode()
-    {
-        return $this->code;
-    }
-
-    /**
-     * @param string $code
-     */
-    public function setCode($code)
-    {
-        $this->code = $code;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCurrency()
-    {
-        return $this->currency;
-    }
-
-    /**
-     * @param string $currency
-     */
-    public function setCurrency($currency)
-    {
-        $this->currency = $currency;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPlatformId()
-    {
-        return $this->platformId;
-    }
-
-    /**
-     * @param string $platformId
-     */
-    public function setPlatformId($platformId)
-    {
-        $this->platformId = $platformId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
+    public function getStatus(): string { return $this->status; }
     /**
      * @param string $status
      */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
+    public function setStatus(string $status) { $this->status = $status; }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getType()
-    {
-        return $this->type;
-    }
+    public function getHolderId(): ?string { return $this->holderId; }
 
     /**
-     * @param string $type
+     * @param string|null $holderId
      */
-    public function setType($type)
-    {
-        $this->type = $type;
-    }
-
+    public function setHolderId(?string $holderId) { $this->holderId = $holderId; }
     /**
-     * @return string
+     * @return string|null
      */
-    public function getWalletId()
-    {
-        return $this->walletId;
-    }
-
+    public function getPlatformId(): string { return $this->platformId; }
     /**
-     * @param string $walletId
+     * @param string $pif
      */
-    public function setWalletId($walletId)
-    {
-        $this->walletId = $walletId;
-    }
+    public function setPlatformId(string $pif) { $this->platformId = $pif; }
+
+    public function getEncodedBy(): ?string { return $this->encoder; }
+
+    public function setEncodedBy(?string $user) { $this->encoder = $user; }
+
+    public function getValidatededBy(): ?string { return $this->validator; }
+
+    public function setValidatedBy(?string $user) { $this->validator = $user; }
+
+    public function getEncodedAt(): ?\DateTimeImmutable { return $this->encodedAt; }
+
+    public function setEncodedAt(?\DateTimeImmutable $date) { $this->encodedAt = $date; }
+
+    public function getValidatedAt(): ?\DateTimeImmutable { return $this->validatedAt; }
+
+    public function setValidatedAt(?\DateTimeImmutable $date) { $this->validatedAt = $date; }
+
+    public function getSchemaId(): string { return $this->schemaId; }
+
+    public function setSchemaId(string $id) { $this->schemaId = $id; }
+
+    public function getTransactionAmount(): string { return $this->transactionAmount; }
+
+    public function setTransactionAmount(string $amount) { $this->transactionAmount = $amount; }
+
+    public function getCurrency(): string { return $this->currency; }
+
+    public function setCurrency(string $currency) { $this->currency = $currency; }
+
+    public function getCommissionAmount(): string { return $this->commissionAmount; }
+
+    public function setCommissionAmount(string $amount) { $this->commissionAmount = $amount; }
+
+    public function getCommissionCurrency(): string { return $this->commissionCurrency; }
+
+    public function setCommissionCurrency(string $currency) { $this->commissionCurrency = $currency; }
 
     /**
-     * @return string
-     */
-    public function getBufferWalletId()
-    {
-        return $this->bufferWalletId;
-    }
-
-    /**
-     * @param string $bufferWalletId
-     */
-    public function setBufferWalletId($bufferWalletId)
-    {
-        $this->bufferWalletId = $bufferWalletId;
-    }
-
-    /**
-     * Get the value of data1
+     * Get the value of authorizationRequestId
      */ 
-    public function getData1()
+    public function getAuthorizationRequestId(): string
     {
-        return $this->data1;
+        return $this->authorizationRequestId;
     }
 
     /**
-     * Set the value of data1
+     * Set the value of authorizationRequestId
      *
      * @return  self
      */ 
-    public function setData1($data1)
+    public function setAuthorizationRequestId(string $authorizationRequestId)
     {
-        $this->data1 = $data1;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of data2
-     */ 
-    public function getData2()
-    {
-        return $this->data2;
-    }
-
-    /**
-     * Set the value of data2
-     *
-     * @return  self
-     */ 
-    public function setData2($data2)
-    {
-        $this->data2 = $data2;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of data3
-     */ 
-    public function getData3()
-    {
-        return $this->data3;
-    }
-
-    /**
-     * Set the value of data3
-     *
-     * @return  self
-     */ 
-    public function setData3($data3)
-    {
-        $this->data3 = $data3;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of data4
-     */ 
-    public function getData4()
-    {
-        return $this->data4;
-    }
-
-    /**
-     * Set the value of data4
-     *
-     * @return  self
-     */ 
-    public function setData4($data4)
-    {
-        $this->data4 = $data4;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of data5
-     */ 
-    public function getData5()
-    {
-        return $this->data5;
-    }
-
-    /**
-     * Set the value of data5
-     *
-     * @return  self
-     */ 
-    public function setData5($data5)
-    {
-        $this->data5 = $data5;
-
-        return $this;
-    }
-
-    /**
-     * Get the value of data6
-     */ 
-    public function getData6()
-    {
-        return $this->data6;
-    }
-
-    /**
-     * Set the value of data6
-     *
-     * @return  self
-     */ 
-    public function setData6($data6)
-    {
-        $this->data6 = $data6;
+        $this->authorizationRequestId = $authorizationRequestId;
 
         return $this;
     }

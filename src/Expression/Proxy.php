@@ -7,6 +7,9 @@
  * file that was distributed with this source code.
  */
 namespace Mukadi\Wallet\Core\Expression;
+
+use Mukadi\Wallet\Core\Operation;
+
 /**
  * Class Proxy.
  * 
@@ -14,10 +17,8 @@ namespace Mukadi\Wallet\Core\Expression;
  */
 class Proxy  
 {
-    /** @var object */
-    private $subject;
 
-    public function __construct($subject) {
+    public function __construct(private Operation $subject) {
         $this->subject = $subject;
     }
 
@@ -25,6 +26,9 @@ class Proxy
         $getter = "get".ucfirst($name);
         if(method_exists($this->subject, $getter)) {
             return $this->subject->$getter();
+        }
+        else if (property_exists($this->subject, $name)) {
+            return $this->subject->$name;
         }
         else
             throw new \BadMethodCallException(
@@ -36,6 +40,9 @@ class Proxy
         $setter = "set".ucfirst($name);
         if(method_exists($this->subject, $setter)) {
             $this->subject->$setter($value);
+        }
+        else if (property_exists($this->subject, $name)) {
+            return $this->subject->$name = $value;
         }
         else
             throw new \BadMethodCallException(

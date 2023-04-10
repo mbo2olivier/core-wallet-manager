@@ -19,16 +19,21 @@ class Codes
     const OPERATION_TYPE_CASH_IN = "C";
     const OPERATION_TYPE_CASH_OUT = "D";
 
-    const OPERATION_STATUS_INIT = "I";
-    const OPERATION_STATUS_SUCCESS = "S";
-    const OPERATION_STATUS_AUTHORIZED = "A";
-    const OPERATION_STATUS_UNAUTHORIZED = "U";
-    const OPERATION_STATUS_ERROR = "E";
-
     const AUTH_STATUS_PENDING = "P";
-    const AUTH_STATUS_FINALIZED = "F";
-    const AUTH_STATUS_REVERSED = "R";
+    const AUTH_STATUS_ACCEPTED = "A";
+    const AUTH_STATUS_REFUSED = "R";
 
-    const AUTH_TYPE_DEBIT = 'D';
-    const AUTH_TYPE_REVERSE = 'R';
+    const PLATFORM_MODE_BANK= 'BANK';
+    const PLATFORM_MODE_MERCHANT= 'MERCHANT';
+    const PLATFORM_MODE_MARKETPLACE= 'MARKETPLACE';
+    const PLATFORM_MODE_AGGREGATOR= 'AGGREGATOR';
+
+    public static function getAvailableModes(): array {
+        return [
+            'Bank' => static::PLATFORM_MODE_BANK,
+            'Merchant' => static::PLATFORM_MODE_MERCHANT,
+            'Marketplace' => static::PLATFORM_MODE_MARKETPLACE,
+            'Aggregator' => static::PLATFORM_MODE_AGGREGATOR,
+        ];
+    }
 }

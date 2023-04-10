@@ -15,175 +15,114 @@ namespace Mukadi\Wallet\Core;
 interface AuthorizationInterface
 {
     /**
-     * @return double
+     * @return \DateTimeImmutable
      */
-    public function getBalance();
+    public function getDate(): \DateTimeImmutable;
     /**
-     * @param double $balance
+     * @param \DateTimeImmutable $date
      */
-    public function setBalance($balance);
+    public function setDate(\DateTimeImmutable $date);
+
     /**
-     * @return double
+     * @return string|null
      */
-    public function getAmount();
+    public function getDescription(): ?string;
     /**
-     * @param double $amount
+     * @param string|null $descr
      */
-    public function setAmount($amount);
+    public function setDescription(?string $descr);
+
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCurrency();
+    public function getOperationCode(): ?string;
     /**
-     * @param string $currency
+     * @param string|null $code
      */
-    public function setCurrency($currency);
+    public function setOperationCode(?string $code);
     /**
-     * @return string
+     * @return string|null
      */
-    public function getCode();
+    public function getOperationId(): ?string;
     /**
-     * @param string $code
+     * @param string|null $id
      */
-    public function setCode($code);
-    /**
-     * @return string
-     */
-    public function getType();
-    /**
-     * @param string $type
-     */
-    public function setType($type);
+    public function setOperationId(?string $id);
     /**
      * @return string
      */
-    public function getAuthorizationId();
+    public function getAuthorizationId(): string;
     /**
      * @param string $id
      */
-    public function setAuthorizationId($id);
+    public function setAuthorizationId(string $id);
     /**
      * @return string
      */
-    public function getStatus();
+    public function getStatus(): string;
     /**
      * @param string $status
      */
-    public function setStatus($status);
+    public function setStatus(string $status);
     /**
-     * @return string
+     * @return string|null
      */
-    public function getWalletId();
-    /**
-     * @param string $id
-     */
-    public function setWalletId($id);
-    /**
-     * @return string
-     */
-    public function getChannelId();
+    public function getAuthorizationRequestId(): ?string;
     /**
      * @param string $id
      */
-    public function setChannelId($id);
+    public function setAuthorizationRequestId(string $requestId);
     /**
-     * @return string
+     * @return string|null
      */
-    public function getAuthorizationRef();
-    /**
-     * @param string $ref
-     */
-    public function setAuthorizationRef($ref);
-    /**
-     * @return string
-     */
-    public function getRequester();
+    public function getHolderId(): ?string;
 
     /**
-     * @param string $requester
+     * @param string|null $holderId
      */
-    public function setRequester($requester);
+    public function setHolderId(?string $holderId);
     /**
-     * @return string
+     * @return string|null
      */
-    public function getLabel();
-
-    /**
-     * @param string $label
-     */
-    public function setLabel($label);
-    /**
-     * @return string
-     */
-    public function getPlatformId();
+    public function getPlatformId(): string;
     /**
      * @param string $pif
      */
-    public function setPlatformId($pif);
-    /**
-     * Get the value of data1
-     */ 
-    public function getData1();
-    /**
-     * Set the value of data1
-     *
-     * @return  self
-     */ 
-    public function setData1($data1);
-    /**
-     * Get the value of data2
-     */ 
-    public function getData2();
-    /**
-     * Set the value of data2
-     *
-     * @return  self
-     */ 
-    public function setData2($data2);
+    public function setPlatformId(string $pif);
 
-    /**
-     * Get the value of data3
-     */ 
-    public function getData3();
+    public function getEncodedBy(): ?string;
 
-    /**
-     * Set the value of data3
-     *
-     * @return  self
-     */ 
-    public function setData3($data3);
-    /**
-     * Get the value of data4
-     */ 
-    public function getData4();
+    public function setEncodedBy(?string $user);
 
-    /**
-     * Set the value of data4
-     *
-     * @return  self
-     */ 
-    public function setData4($data4);
+    public function getValidatededBy(): ?string;
 
-    /**
-     * Get the value of data5
-     */ 
-    public function getData5();
+    public function setValidatedBy(?string $user);
 
-    /**
-     * Set the value of data5
-     *
-     * @return  self
-     */ 
-    public function setData5($data5);
+    public function getEncodedAt(): ?\DateTimeImmutable;
 
-    /**
-     * Get the value of data6
-     */ 
-    public function getData6();
-    /**
-     * Set the value of data6
-     *
-     * @return  self
-     */ 
-    public function setData6($data6);
+    public function setEncodedAt(?\DateTimeImmutable $date);
+
+    public function getValidatedAt(): ?\DateTimeImmutable;
+
+    public function setValidatedAt(?\DateTimeImmutable $date);
+
+    public function getSchemaId(): string;
+
+    public function setSchemaId(string $schemaId);
+
+    public function getTransactionAmount(): string;
+
+    public function setTransactionAmount(string $amount);
+
+    public function getCurrency(): string;
+
+    public function setCurrency(string $currency);
+
+    public function getCommissionAmount(): string;
+
+    public function setCommissionAmount(string $amount);
+
+    public function getCommissionCurrency(): string;
+
+    public function setCommissionCurrency(string $currency);
 }

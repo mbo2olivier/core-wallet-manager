@@ -9,11 +9,14 @@
 namespace Mukadi\Wallet\Core\Storage;
 
 use Mukadi\Wallet\Core\WalletInterface;
-use Mukadi\Wallet\Core\OperationInterface;
 use Mukadi\Wallet\Core\HolderInterface;
 use Mukadi\Wallet\Core\AuthorizationInterface;
+use Mukadi\Wallet\Core\EntryInterface;
 use Mukadi\Wallet\Core\PlatformInterface;
+use Mukadi\Wallet\Core\Instruction;
 use Mukadi\Wallet\Core\Exception\StorageLayerException;
+use Mukadi\Wallet\Core\SchemaInterface;
+
 /**
  * class WalletStorageLayer.
  * 
@@ -39,73 +42,104 @@ abstract class WalletStorageLayer
      * save wallet in the storage layer
      * 
      * @param WalletInterface $wallet 
+     * @param bool $autocommit
      * @return WalletInterface
      * @throws StorageLayerException
      **/
-    public abstract function saveWallet(WalletInterface $wallet);
+    public abstract function saveWallet(WalletInterface $wallet, bool $autocommit = true);
 
     /**
-     * save operation in the storage layer
+     * save entry in the storage layer
      * 
-     * @param OperationInterface $op 
-     * @return OperationInterface
+     * @param EntryInterface $op 
+     * @param bool $autocommit
+     * @return EntryInterface
      * @throws StorageLayerException
      **/
-    abstract public function saveOperation(OperationInterface $op);
+    abstract public function saveEntry(EntryInterface $op, bool $autocommit = true): EntryInterface;
 
     /**
      * save holder in the storage layer
      * 
      * @param HolderInterface $holder 
+     * @param bool $autocommit
      * @return HolderInterface
      * @throws StorageLayerException
      **/
-    public abstract function saveHolder(HolderInterface $holder);
+    public abstract function saveHolder(HolderInterface $holder, bool $autocommit = true): HolderInterface;
 
     /**
      * save authorization in the storage layer
      * 
      * @param AuthorizationInterface $auth 
+     * @param bool $autocommit
      * @return AuthorizationInterface
      * @throws StorageLayerException
      **/
-    public abstract function saveAuthorization(AuthorizationInterface $auth);
+    public abstract function saveAuthorization(AuthorizationInterface $auth, bool $autocommit = true): AuthorizationInterface;
 
     /**
      * getting wallet by criteria
      *
      * @param array $criteria
-     * @return WalletInterface
+     * @return null|WalletInterface
      * @throws StorageLayerException
      **/
-    public abstract function findWalletBy(array $criteria);
+    public abstract function findWalletBy(array $criteria): ?WalletInterface;
 
     /**
-     * getting operation by criteria
+     * getting entry by criteria
      *
      * @param array $criteria
-     * @return OperationInterface
+     * @return null|EntryInterface
      * @throws StorageLayerException
      **/
-    public abstract function findOperationBy(array $criteria);
+    public abstract function findEntryBy(array $criteria): ?EntryInterface;
 
     /**
      * getting holder by criteria
      *
      * @param array $criteria
-     * @return HolderInterface
+     * @return null|HolderInterface
      * @throws StorageLayerException
      **/
-    public abstract function findHolderBy(array $criteria);
+    public abstract function findHolderBy(array $criteria): ?HolderInterface;
 
     /**
      * getting authorization by criteria
      *
      * @param array $criteria
-     * @return AuthorizationInterface
+     * @return null|AuthorizationInterface
      * @throws StorageLayerException
      **/
-    public abstract function findAuthorizationBy(array $criteria);
+    public abstract function findAuthorizationBy(array $criteria): ?AuthorizationInterface;
+
+    /**
+     * find previous authorization by request id
+     *
+     * @param string $requestId
+     * @return null|AuthorizationInterface
+     * @throws StorageLayerException
+     **/
+    public abstract function findPreviousAuthorization(string $requestId, string $operationCode): ?AuthorizationInterface;
+
+    /**
+     * find all wallets by their ids
+     *
+     * @param string[] $walletIds
+     * @return array<string,WalletInterface>
+     * @throws StorageLayerException
+     **/
+    public abstract function findAllWalletsById(array $walletIds): iterable;
+
+    /**
+     * getting schema by criteria
+     *
+     * @param array $criteria
+     * @return null|SchemaInterface
+     * @throws StorageLayerException
+     **/
+    public abstract function findSchemaBy(array $criteria): ?SchemaInterface;
 
     /**
      * getting platform by id
@@ -114,16 +148,22 @@ abstract class WalletStorageLayer
      * @return PlatformInterface
      * @throws StorageLayerException
      **/
-    public abstract function getPlatform($id);
+    public abstract function getPlatform($id): ?PlatformInterface;
 
     /**
-     * getting operations by criteria
+     * getting entries by criteria
      *
      * @param array $criteria
-     * @return OperationInterface[]
+     * @return EntryInterface[]
      * @throws StorageLayerException
      **/
-    public abstract function listOperationBy(array $criteria);
+    public abstract function listEntryBy(array $criteria): iterable;
+
+    /**
+     * @param string $code;
+     * @return Instruction[]
+     */
+    public abstract function getInstructions($code): iterable;
 
     /**
      * Adds support for magic method calls.
@@ -141,8 +181,8 @@ abstract class WalletStorageLayer
             return $this->resolveFindByCall('findWalletBy', substr($method, 12), $arguments);
         }
 
-        if (0 === strpos($method, 'findOperationBy')) {
-            return $this->resolveFindByCall('findOperationBy', substr($method, 15), $arguments);
+        if (0 === strpos($method, 'findEntryBy')) {
+            return $this->resolveFindByCall('findEntryBy', substr($method, 11), $arguments);
         }
 
         if (0 === strpos($method, 'findAuthorizationBy')) {
@@ -151,6 +191,10 @@ abstract class WalletStorageLayer
 
         if (0 === strpos($method, 'findHolderBy')) {
             return $this->resolveFindByCall('findHolderBy', substr($method, 12), $arguments);
+        }
+
+        if (0 === strpos($method, 'findSchemaBy')) {
+            return $this->resolveFindByCall('findSchemaBy', substr($method, 12), $arguments);
         }
 
         throw new \BadMethodCallException(

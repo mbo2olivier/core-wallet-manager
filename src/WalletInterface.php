@@ -17,105 +17,116 @@ interface WalletInterface
     /**
      * @return double
      */
-    public function getBalance();
+    public function getBalance(): string;
     /**
      * @param double $balance
      */
-    public function setBalance($balance);
+    public function setBalance(string $balance);
     /**
      * @return string
      */
-    public function getCurrency();
+    public function getCurrency(): string;
     /**
      * @param string $currency
      */
-    public function setCurrency($currency);
+    public function setCurrency(string $currency);
     /**
      * @return string
      */
-    public function getName();
+    public function getName(): ?string;
     /**
      * @param string $name
      */
-    public function setName($name);
+    public function setName(?string $name);
     /**
-     * @return \DateTime
+     * @return \DateTimeImmutable
      */
-    public function getCreatedAt();
+    public function getCreatedAt(): \DateTimeImmutable;
     /**
-     * @param \DateTime $date
+     * @param \DateTimeImmutable $date
      */
-    public function setCreatedAt($date);
+    public function setCreatedAt(\DateTimeImmutable $date);
     /**
-     * @return \DateTime
+     * @return ?\DateTimeImmutable
      */
-    public function getBalanceUpdatedAt();
+    public function getBalanceUpdatedAt(): ?\DateTimeImmutable;
     /**
-     * @param \DateTime $date
+     * @param ?\DateTimeImmutable $date
      */
-    public function setBalanceUpdatedAt($date);
+    public function setBalanceUpdatedAt(?\DateTimeImmutable $date);
     /**
      * @return string
      */
-    public function getWalletType();
+    public function getWalletProfileId():?string;
     /**
      * @param string $type
      */
-    public function setWalletType($type);
+    public function setWalletProfileId(?string $profileId);
     /**
      * @return string
      */
-    public function getHolderId();
+    public function getHolderId():?string;
     /**
      * @param string $holder
      */
-    public function setHolderId($holder);
+    public function setHolderId(?string $holder);
     /**
      * @return string
      */
-    public function getWalletId();
+    public function getWalletId(): string;
     /**
      * @param string $id
      */
-    public function setWalletId($id);
+    public function setWalletId(string $id);
+
     /**
      * @return string
      */
-    public function getStatus();
+    public function getWalletPublicId(): ?string;
     /**
-     * @param string $status
+     * @param string $id
      */
-    public function setStatus($status);
+    public function setWalletPublicId(?string $id);
+
     /**
      * @return boolean
      */
-    public function isClosed();
+    public function isClosed(): bool;
     /**
      * @param boolean $closed
      */
-    public function setClosed($closed);
+    public function setClosed(bool $closed);
     /**
-     * @return \DateTime
+     * @return ?\DateTimeImmutable
      */
-    public function getClosedAt();
+    public function getClosedAt(): ?\DateTimeImmutable;
     /**
-     * @param \DateTime $date
+     * @param ?\DateTimeImmutable $date
      */
-    public function setClosedAt($date);
+    public function setClosedAt(?\DateTimeImmutable $date);
     /**
      * @return string
      */
-    public function getPlatformId();
+    public function getPlatformId(): string;
     /**
      * @param string $pif
      */
-    public function setPlatformId($pif);
+    public function setPlatformId(string $pif);
     /**
-     * @return double
+     * @return string
      */
-    public function getOverdraft();
+    public function getGlCode(): ?string;
     /**
-     * @param double $overdraft
+     * @param double $code
      */
-    public function setOverdraft($overdraft);
+    public function setGlCode(?string $code);
+    
+    /**
+     * @return string
+     */
+    public function getWalletTypeId():?string;
+    /**
+     * @param string $type
+     */
+    public function setWalletTypeId(?string $profileId);
 }

@@ -17,17 +17,25 @@ interface PlatformInterface
     /**
      * @return string
      */
-    public function getPlatformId();
+    public function getPlatformId(): string;
     /**
      * @param string $pif
      */
-    public function setPlatformId($pif);
+    public function setPlatformId(string $pif);
     /**
      * @return string
      */
-    public function getLabel();
+    public function getLabel(): string;
     /**
      * @param string $label
      */
-    public function setLabel($label);
+    public function setLabel(string $label);
+    /**
+     * @return string
+     */
+    public function getMode(): string;
+    /**
+     * @param string $label
+     */
+    public function setMode(string $label);
 }

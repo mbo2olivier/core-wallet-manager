@@ -5,242 +5,162 @@ use Mukadi\Wallet\Core\WalletInterface;
 
 class Wallet  implements WalletInterface
 {
-    /** @var  string */
-    protected $id;
+
     /** @var  double */
     protected $balance;
-    /** @var  \DateTime */
-    protected $balanceUpdatedAt;
-    /** @var  \DateTime */
-    protected $closedAt;
-    /** @var  \DateTime */
-    protected $createdAt;
+
+    /** @var  null|\DateTimeImmutable */
+    protected ?\DateTimeImmutable $balanceUpdatedAt;
+
+    /** @var  null|\DateTimeImmutable */
+    protected ?\DateTimeImmutable $closedAt;
+
+    /** @var  \DateTimeImmutable */
+    protected \DateTimeImmutable $createdAt;
+
     /** @var  string */
-    protected $currency;
+    protected string $currency;
+
+    /** @var  null|string */
+    protected ?string $holderId;
+
+    /** @var  null|string */
+    protected ?string $name;
+
     /** @var  string */
-    protected $holderId;
+    protected string $platformId;
+
+    /** @var  null|string */
+    protected ?string $glCode;
+
     /** @var  string */
-    protected $name;
-    /** @var  string */
-    protected $platformId;
-    /** @var  string */
-    protected $status;
-    /** @var  string */
-    protected $walletId;
-    /** @var  string */
-    protected $walletType;
+    protected string $walletId;
+
+    /** @var  null|string */
+    protected ?string $walletPublicId;
+
+    /** @var  null|string */
+    protected ?string $walletProfileId;
+
+    /** @var  null|string */
+    protected ?string $walletTypeId;
+
     /** @var  boolean */
-    protected $closed;
-    /** @var double */
-    protected $overdraft;
+    protected bool $closed;
+
+
+    /**
+     * @return double
+     */
+    public function getBalance(): string { return $this->balance; }
+    /**
+     * @param double $balance
+     */
+    public function setBalance(string $balance) { $this->balance = $balance; }
+    /**
+     * @return string
+     */
+    public function getCurrency(): string { return $this->currency; }
+    /**
+     * @param string $currency
+     */
+    public function setCurrency(string $currency) { $this->currency = $currency; }
+    /**
+     * @return string
+     */
+    public function getName(): ?string { return $this->name; }
+    /**
+     * @param string $name
+     */
+    public function setName(?string $name) { $this->name = $name; }
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getCreatedAt(): \DateTimeImmutable { return $this->createdAt; }
+    /**
+     * @param \DateTimeImmutable $date
+     */
+    public function setCreatedAt(\DateTimeImmutable $date) { $this->createdAt = $date; }
+    /**
+     * @return ?\DateTimeImmutable
+     */
+    public function getBalanceUpdatedAt(): ?\DateTimeImmutable { return $this->balanceUpdatedAt; }
+    /**
+     * @param ?\DateTimeImmutable $date
+     */
+    public function setBalanceUpdatedAt(?\DateTimeImmutable $date) { $this->balanceUpdatedAt = $date; }
+    /**
+     * @return string
+     */
+    public function getWalletProfileId():?string { return $this->walletProfileId; }
+    /**
+     * @param string $type
+     */
+    public function setWalletProfileId(?string $profileId) { $this->walletProfileId = $profileId; }
+    /**
+     * @return string
+     */
+    public function getHolderId():?string { return $this->holderId; }
+    /**
+     * @param string $holder
+     */
+    public function setHolderId(?string $holderId) { $this->holderId = $holderId; }
+    /**
+     * @return string
+     */
+    public function getWalletId(): string { return $this->walletId; }
+    /**
+     * @param string $id
+     */
+    public function setWalletId(string $id) { $this->walletId = $id; }
 
     /**
      * @return string
      */
-    public function getId()
-    {
-        return $this->id;
-    }
-
+    public function getWalletPublicId(): ?string { return $this->walletPublicId; }
     /**
-     * @return float
+     * @param string $id
      */
-    public function getBalance()
-    {
-        return $this->balance;
-    }
-
-    /**
-     * @param float $balance
-     */
-    public function setBalance($balance)
-    {
-        $this->balance = $balance;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getBalanceUpdatedAt()
-    {
-        return $this->balanceUpdatedAt;
-    }
-
-    /**
-     * @param \DateTime $balanceUpdatedAt
-     */
-    public function setBalanceUpdatedAt($balanceUpdatedAt)
-    {
-        $this->balanceUpdatedAt = $balanceUpdatedAt;
-    }
+    public function setWalletPublicId(?string $id) { $this->walletPublicId = $id; }
 
     /**
      * @return boolean
      */
-    public function isClosed()
-    {
-        return $this->closed;
-    }
-
+    public function isClosed(): bool { return $this->closed; }
     /**
      * @param boolean $closed
      */
-    public function setClosed($closed)
-    {
-        $this->closed = $closed;
-    }
-
+    public function setClosed(bool $closed) { $this->closed = $closed; }
     /**
-     * @return \DateTime
+     * @return ?\DateTimeImmutable
      */
-    public function getClosedAt()
-    {
-        return $this->closedAt;
-    }
-
+    public function getClosedAt(): ?\DateTimeImmutable { return $this->closedAt; }
     /**
-     * @param \DateTime $closedAt
+     * @param ?\DateTimeImmutable $date
      */
-    public function setClosedAt($closedAt)
-    {
-        $this->closedAt = $closedAt;
-    }
-
+    public function setClosedAt(?\DateTimeImmutable $date) { $this->closedAt = $date; }
     /**
      * @return string
      */
-    public function getCurrency()
-    {
-        return $this->currency;
-    }
-
+    public function getPlatformId(): string { return $this->platformId; }
     /**
-     * @param string $currency
+     * @param string $pif
      */
-    public function setCurrency($currency)
-    {
-        $this->currency = $currency;
-    }
-
+    public function setPlatformId(string $pif) { $this->platformId = $pif; }
     /**
      * @return string
      */
-    public function getHolderId()
-    {
-        return $this->holderId;
-    }
-
+    public function getGlCode(): ?string { return $this->glCode; }
     /**
-     * @param string $holderId
+     * @param double $code
      */
-    public function setHolderId($holderId)
-    {
-        $this->holderId = $holderId;
-    }
-
+    public function setGlCode(?string $code) { $this->glCode = $code; }
     /**
      * @return string
      */
-    public function getName()
-    {
-        return $this->name;
-    }
-
+    public function getWalletTypeId():?string { return $this->walletTypeId; }
     /**
-     * @param string $name
+     * @param string $type
      */
-    public function setName($name)
-    {
-        $this->name = $name;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPlatformId()
-    {
-        return $this->platformId;
-    }
-
-    /**
-     * @param string $platformId
-     */
-    public function setPlatformId($platformId)
-    {
-        $this->platformId = $platformId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getStatus()
-    {
-        return $this->status;
-    }
-
-    /**
-     * @param string $status
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-    }
-
-    /**
-     * @return string
-     */
-    public function getWalletId()
-    {
-        return $this->walletId;
-    }
-
-    /**
-     * @param string $walletId
-     */
-    public function setWalletId($walletId)
-    {
-        $this->walletId = $walletId;
-    }
-
-    /**
-     * @return string
-     */
-    public function getWalletType()
-    {
-        return $this->walletType;
-    }
-
-    /**
-     * @param string $walletType
-     */
-    public function setWalletType($walletType)
-    {
-        $this->walletType = $walletType;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @param \DateTime $createdAt
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-    }
-    /** @return double */
-    public function getOverdraft()
-    {
-        return $this->overdraft;
-    }
-
-    public function setOverdraft($overdraft)
-    {
-        $this->overdraft = $overdraft;
-    }
+    public function setWalletTypeId(?string $typeId) { $this->walletTypeId = $typeId; }
 }
