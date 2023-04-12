@@ -73,7 +73,7 @@ abstract class AbstractWalletManager
      **/
     public function closeWallet(string $walletId): WalletInterface
     {
-        $wallet = $this->storage->findWalletBy(["walletId" => $walletId]);
+        $wallet = $this->storage->getWallet($walletId);
         if($wallet == null)
             throw new WalletException("cannot find wallet with Id : ".$walletId);
         if($wallet->isClosed())

@@ -46,7 +46,7 @@ abstract class WalletStorageLayer
      * @return WalletInterface
      * @throws StorageLayerException
      **/
-    public abstract function saveWallet(WalletInterface $wallet, bool $autocommit = true);
+    public abstract function saveWallet(WalletInterface $wallet, bool $autocommit = true): WalletInterface;
 
     /**
      * save entry in the storage layer
@@ -145,10 +145,28 @@ abstract class WalletStorageLayer
      * getting platform by id
      *
      * @param string $id
-     * @return PlatformInterface
+     * @return null|PlatformInterface
      * @throws StorageLayerException
      **/
     public abstract function getPlatform($id): ?PlatformInterface;
+
+    /**
+     * getting schema by id
+     *
+     * @param string $id
+     * @return null|SchemaInterface
+     * @throws StorageLayerException
+     **/
+    public abstract function getSchema($id): ?SchemaInterface;
+
+    /**
+     * getting wallet by id
+     *
+     * @param string $id
+     * @return null|WalletInterface
+     * @throws StorageLayerException
+     **/
+    public abstract function getWallet($id): ?WalletInterface;
 
     /**
      * getting entries by criteria

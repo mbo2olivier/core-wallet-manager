@@ -85,7 +85,7 @@ class AbstractWalletManagerTest extends TestCase {
     public function testClosedWalletClosed() {
         $w = new Wallet();
         $w->setClosed(true);
-        $this->storage->method('findWalletBy')->willReturn($w);
+        $this->storage->method('getWallet')->willReturn($w);
         $manager = new WalletManager($this->schema, $this->storage, Authorization::class);
 
         $this->expectException(WalletException::class);
@@ -97,7 +97,7 @@ class AbstractWalletManagerTest extends TestCase {
     public function testClosed() {
         $w = new Wallet();
         $w->setClosed(false);
-        $this->storage->method('findWalletBy')->willReturn($w);
+        $this->storage->method('getWallet')->willReturn($w);
         $manager = new WalletManager($this->schema, $this->storage, Authorization::class);
 
         $w = $manager->closeWallet('FOOBAR');

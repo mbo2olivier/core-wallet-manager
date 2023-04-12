@@ -59,7 +59,7 @@ abstract class AbstractSchemaManager
      * @return EntryInterface[]
      */
     public function getSchemaFor(Operation $operation): iterable {
-        $schema = $this->storage->findSchemaBy(['id' => $operation->getSchemaId()]);
+        $schema = $this->storage->getSchema($operation->getSchemaId());
         if (null === $schema) {
             throw new SchemaException(sprintf('cannot find schema with ID: %s', $operation->getSchemaId()));
         }
@@ -103,16 +103,6 @@ abstract class AbstractSchemaManager
 
             if (null === $wallet) {
                 throw new WalletException(sprintf('the wallet with public Id: %s doesn\'t exist', $id));
-            }
-
-            return $wallet->getWalletId();
-        });
-
-        $this->registerFx('glCode', function (array $args, string $id) use ($storage) {
-            $wallet  = $storage->findWalletBy(['glCode' => $id]);
-
-            if (null === $wallet) {
-                throw new WalletException(sprintf('the wallet with GL code: %s doesn\'t exist', $id));
             }
 
             return $wallet->getWalletId();

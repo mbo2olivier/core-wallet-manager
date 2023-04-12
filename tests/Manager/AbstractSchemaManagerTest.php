@@ -78,6 +78,11 @@ class AbstractSchemaManagerTest extends TestCase {
             ->willReturn($schmOne)
         ;
 
+        $storage
+            ->method('getSchema')
+            ->willReturn($schmOne)
+        ;
+
         $w = new Wallet();
         $w->setWalletId("WA002");
         $w->setGlCode("17100");
@@ -85,6 +90,11 @@ class AbstractSchemaManagerTest extends TestCase {
 
         $storage
             ->method('findWalletBy')
+            ->willReturn($w)
+        ;
+
+        $storage
+            ->method('getWallet')
             ->willReturn($w)
         ;
 
