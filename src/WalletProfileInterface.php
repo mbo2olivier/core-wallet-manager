@@ -38,4 +38,12 @@ interface WalletProfileInterface
      * @param string $pif
      */
     public function setPlatformId(string $pif);
+    /**
+     * @return string
+     */
+    public function getType(): string;
+    /**
+     * @param string $code
+     */
+    public function setType(string $typeId);
 }
