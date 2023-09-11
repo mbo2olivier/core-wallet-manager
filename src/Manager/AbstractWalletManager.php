@@ -171,24 +171,21 @@ abstract class AbstractWalletManager
 
             $processings = $this->beforeEntryProcessing($processings);
 
-            $debit = 0; $credit = 0;
+            $balances = [];
             foreach($processings as $ew) {
                 $op = $ew->entry;
                 $op->setAuthorizationId($auth->getAuthorizationId());
                 $op->setDate(new \DateTimeImmutable('now'));
                 $op->setPlatformId($auth->getPlatformId());
 
-                if ($op->getType() == Codes::OPERATION_TYPE_CASH_IN){
-                    $credit += $op->getAmount();
-                }
-                else {
-                    $debit += $op->getAmount();
-                }
+                $balance = isset($balances[$op->getCurrency()]) ? $balances[$op->getCurrency()] : 0;
+                $balance += ($op->getType() == Codes::OPERATION_TYPE_CASH_IN ? 1 : -1) * $op->getAmount();
+                $balances[$op->getCurrency()] = $balance;
 
                 $this->execute($op, $ew->wallet);
             }
 
-            if ($batch->isDoubleEntry() && $debit != $credit) {
+            if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b != 0)) > 0) {
                 throw new AuthorizationException($auth, "your entries are not balanced");
             }
 

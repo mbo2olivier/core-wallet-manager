@@ -320,6 +320,24 @@ class AbstractWalletManagerTest extends TestCase {
         $out->setAppliedRate(1);
         $out->setWalletId("WA02");
 
+        $in2 = new Entry();
+        $in->setType(Codes::OPERATION_TYPE_CASH_IN);
+        $in->setCurrency('USD');
+        $in->setAmount(1500);
+        $in->setTransactionCurrency('CDF');
+        $in->setTransactionCurrency(1500);
+        $in->setAppliedRate(1);
+        $in->setWalletId("WA03");
+
+        $out2 = new Entry();
+        $out->setType(Codes::OPERATION_TYPE_CASH_OUT);
+        $out->setCurrency('USD');
+        $out->setAmount(500);
+        $out->setTransactionCurrency('CDF');
+        $out->setTransactionCurrency(500);
+        $out->setAppliedRate(1);
+        $out->setWalletId("WA04");
+
         $w = new Wallet();
         $w->setWalletId("WA01");
         $w->setCurrency('CDF');
@@ -330,6 +348,16 @@ class AbstractWalletManagerTest extends TestCase {
         $w2->setCurrency('CDF');
         $w2->setBalance(1000);
 
+        $w3 = new Wallet();
+        $w3->setWalletId("WA03");
+        $w3->setCurrency('USD');
+        $w3->setBalance(1000);
+
+        $w4 = new Wallet();
+        $w4->setWalletId("WA04");
+        $w4->setCurrency('USD');
+        $w4->setBalance(1000);
+
         $auth = new Authorization();
         $auth->setStatus(Codes::AUTH_STATUS_PENDING);
         $auth->setPlatformId("PL01");
@@ -337,11 +365,13 @@ class AbstractWalletManagerTest extends TestCase {
 
         $batch = new Batch();
         $batch->auth = $auth;
-        $batch->entries = [$in, $out];
+        $batch->entries = [$in, $out, $in2, $out2];
 
         $this->storage->method('findAllWalletsById')->willReturn([
             "WA01" => $w,
             "WA02" => $w2,
+            "WA03" => $w3,
+            "WA04" => $w4,
         ]);
 
 
