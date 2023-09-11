@@ -134,7 +134,7 @@ abstract class AbstractWalletManager
         return $auth;
     }
 
-    public function run(BatchInterface $batch, AuthorizationInterface $auth = null): AuthorizationInterface {
+    public function run(BatchInterface $batch, ?AuthorizationInterface $auth = null): AuthorizationInterface {
 
         if (null === $auth) {
             $auth = $batch->buildAuthorization();
@@ -151,55 +151,56 @@ abstract class AbstractWalletManager
         }
 
         try {
-            $this->storage->beginTransaction();
+            $self = $this;
 
-            $entries = $batch->getEntries();
+            return $this->storage->transactional(function (WalletStorageLayer $storage) use ($batch, $auth, $self) {
+                $entries = $batch->getEntries();
             
-            $ids = array_unique(array_map(fn(EntryInterface $e) => $e->getWalletId(), $entries));
+                $ids = array_unique(array_map(fn(EntryInterface $e) => $e->getWalletId(), $entries));
 
-            $wallets = $this->storage->findAllWalletsById($ids);
-            /** @var array<ProcessingEntry> */
-            $processings = [];
+                $wallets = $storage->findAllWalletsById($ids);
+                /** @var array<ProcessingEntry> */
+                $processings = [];
 
-            foreach ($entries as $e) {
-                if (!isset($wallets[$e->getWalletId()])) {
-                    throw new EntryException(sprintf('cannot find wallet with id %s', $e->getWalletId()));
+                foreach ($entries as $e) {
+                    if (!isset($wallets[$e->getWalletId()])) {
+                        throw new EntryException(sprintf('cannot find wallet with id %s', $e->getWalletId()));
+                    }
+
+                    $processings[] = new ProcessingEntry($e, $wallets[$e->getWalletId()]);
                 }
 
-                $processings[] = new ProcessingEntry($e, $wallets[$e->getWalletId()]);
-            }
+                $processings = $self->beforeEntryProcessing($processings);
 
-            $processings = $this->beforeEntryProcessing($processings);
+                $balances = [];
+                foreach($processings as $ew) {
+                    $op = $ew->entry;
+                    $op->setAuthorizationId($auth->getAuthorizationId());
+                    $op->setDate(new \DateTimeImmutable('now'));
+                    $op->setPlatformId($auth->getPlatformId());
 
-            $balances = [];
-            foreach($processings as $ew) {
-                $op = $ew->entry;
-                $op->setAuthorizationId($auth->getAuthorizationId());
-                $op->setDate(new \DateTimeImmutable('now'));
-                $op->setPlatformId($auth->getPlatformId());
+                    $balance = isset($balances[$op->getCurrency()]) ? $balances[$op->getCurrency()] : 0;
+                    $balance += ($op->getType() == Codes::OPERATION_TYPE_CASH_IN ? 1 : -1) * $op->getAmount();
+                    $balances[$op->getCurrency()] = $balance;
 
-                $balance = isset($balances[$op->getCurrency()]) ? $balances[$op->getCurrency()] : 0;
-                $balance += ($op->getType() == Codes::OPERATION_TYPE_CASH_IN ? 1 : -1) * $op->getAmount();
-                $balances[$op->getCurrency()] = $balance;
+                    $self->execute($op, $ew->wallet);
+                }
 
-                $this->execute($op, $ew->wallet);
-            }
+                if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b !== 0)) > 0) {
+                    throw new AuthorizationException($auth, "your entries are not balanced");
+                }
 
-            if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b != 0)) > 0) {
-                throw new AuthorizationException($auth, "your entries are not balanced");
-            }
+                $auth->setStatus(Codes::AUTH_STATUS_ACCEPTED);
+                $storage->saveAuthorization($auth, false);
+                
+                $storage->commit();
+                $self->onAuthorizationAccepted($auth);
 
-            $auth->setStatus(Codes::AUTH_STATUS_ACCEPTED);
-            $this->storage->saveAuthorization($auth, false);
-            
-            $this->storage->commit();
-            $this->onAuthorizationAccepted($auth);
+                return $auth;
+            });
 
-            return $auth;
         }
         catch(AuthorizationException $e) {
-            $this->storage->rollback();
-
             $auth->setStatus(Codes::AUTH_STATUS_REFUSED);
             $this->storage->saveAuthorization($auth);
             $this->onAuthorizationRefused($auth);
@@ -207,8 +208,6 @@ abstract class AbstractWalletManager
             throw $e;
         }
         catch(EntryException $e) {
-            $this->storage->rollback();
-
             $auth->setStatus(Codes::AUTH_STATUS_REFUSED);
             $this->storage->saveAuthorization($auth);
             $this->onAuthorizationRefused($auth);
@@ -216,8 +215,6 @@ abstract class AbstractWalletManager
             throw new AuthorizationException($auth, $e->getMessage(), $e);
         }
         catch(\Exception $e) {
-            $this->storage->rollback();
-
             $auth->setStatus(Codes::AUTH_STATUS_REFUSED);
             $this->storage->saveAuthorization($auth);
             $this->onAuthorizationRefused($auth);

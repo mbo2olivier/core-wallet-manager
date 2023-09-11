@@ -25,6 +25,26 @@ use Mukadi\Wallet\Core\SchemaInterface;
 abstract class WalletStorageLayer
 {
     use FindByCallResolver;
+
+    /**
+     * @param callable $transaction;
+     * @return mixed
+     */
+    public function transactional(callable $transaction): mixed {
+        $this->beginTransaction();
+
+        try {
+            $result = $transaction($this);
+            $this->commit();
+
+            return $result;
+        }
+        catch(\Throwable $e) {
+            $this->rollback();
+
+            throw $e;
+        }
+    }
     /**
      * begin a transaction for a batch database operations
      */
