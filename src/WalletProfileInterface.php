@@ -41,9 +41,9 @@ interface WalletProfileInterface
     /**
      * @return string
      */
-    public function getType(): string;
+    public function getTypeId(): ?string;
     /**
      * @param string $code
      */
-    public function setType(string $typeId);
+    public function setTypeId(string $typeId);
 }
