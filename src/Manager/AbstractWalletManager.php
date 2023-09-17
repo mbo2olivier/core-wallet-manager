@@ -186,7 +186,7 @@ abstract class AbstractWalletManager
                     $self->execute($op, $ew->wallet);
                 }
 
-                if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b !== 0)) > 0) {
+                if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b != 0)) > 0) {
                     throw new AuthorizationException($auth, "your entries are not balanced");
                 }
 
