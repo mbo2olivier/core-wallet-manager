@@ -153,7 +153,7 @@ abstract class AbstractWalletManager
         try {
             $self = $this;
 
-            return $this->storage->transactional(function (WalletStorageLayer $storage) use ($batch, $auth, $self) {
+            $auth = $this->storage->transactional(function (WalletStorageLayer $storage) use ($batch, $auth, $self) {
                 $entries = $batch->getEntries();
             
                 $ids = array_unique(array_map(fn(EntryInterface $e) => $e->getWalletId(), $entries));
@@ -193,11 +193,11 @@ abstract class AbstractWalletManager
                 $auth->setStatus(Codes::AUTH_STATUS_ACCEPTED);
                 $storage->saveAuthorization($auth, false);
                 
-                $storage->commit();
-                $self->onAuthorizationAccepted($auth);
-
                 return $auth;
             });
+
+            $this->onAuthorizationAccepted($auth);
+            return $auth;
 
         }
         catch(AuthorizationException $e) {
