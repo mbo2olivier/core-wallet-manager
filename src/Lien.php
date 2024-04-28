@@ -12,6 +12,10 @@ class Lien {
 
     /** @var  string */
     protected $authorizationId = null;
+
+    /** @var  string */
+    protected $platformId = null;
+
     /** @var  int */
     protected ?int $serialId = 0;
     private ?string $reason = null;
@@ -265,6 +269,26 @@ class Lien {
     public function setStatus($status): self
     {
         $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of platformId
+     */ 
+    public function getPlatformId(): string
+    {
+        return $this->platformId;
+    }
+
+    /**
+     * Set the value of platformId
+     *
+     * @return  self
+     */ 
+    public function setPlatformId(string $platformId)
+    {
+        $this->platformId = $platformId;
 
         return $this;
     }
