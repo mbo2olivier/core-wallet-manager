@@ -1,28 +1,30 @@
 <?php
 namespace Mukadi\Wallet\Core\Test\Manager;
 
-use PHPUnit\Framework\TestCase;
-use Mukadi\Wallet\Core\Exception\AuthorizationException;
-use Mukadi\Wallet\Core\Exception\BalanceException;
-use Mukadi\Wallet\Core\Exception\WalletException;
-use Mukadi\Wallet\Core\Exception\OperationException;
-use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
-use Mukadi\Wallet\Core\Manager\AbstractSchemaManager;
+use Mukadi\Wallet\Core\Lien;
 use Mukadi\Wallet\Core\Codes;
-use Mukadi\Wallet\Core\Exception\EntryException;
 use Mukadi\Wallet\Core\Request;
+use PHPUnit\Framework\TestCase;
 use Mukadi\Wallet\Core\Reversal;
-use Mukadi\Wallet\Core\Test\Operation;
-use Mukadi\Wallet\Core\Test\Authorization;
-use Mukadi\Wallet\Core\Test\Instruction;
-use Mukadi\Wallet\Core\Test\WalletManager;
-use Mukadi\Wallet\Core\Test\Wallet;
-use Mukadi\Wallet\Core\WalletInterface;
-use Mukadi\Wallet\Core\Test\SchemaManager;
-use Mukadi\Wallet\Core\Storage\SchemaStorageLayer;
 use Mukadi\Wallet\Core\Test\Batch;
 use Mukadi\Wallet\Core\Test\Entry;
+use Mukadi\Wallet\Core\Test\Wallet;
 use Mukadi\Wallet\Core\Test\Payment;
+use Mukadi\Wallet\Core\Test\Operation;
+use Mukadi\Wallet\Core\WalletInterface;
+use Mukadi\Wallet\Core\Test\Instruction;
+use Mukadi\Wallet\Core\Test\Authorization;
+use Mukadi\Wallet\Core\Test\SchemaManager;
+use Mukadi\Wallet\Core\Test\WalletManager;
+use Mukadi\Wallet\Core\Exception\EntryException;
+use Mukadi\Wallet\Core\Exception\WalletException;
+use Mukadi\Wallet\Core\Exception\BalanceException;
+use Mukadi\Wallet\Core\Storage\SchemaStorageLayer;
+use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
+use Mukadi\Wallet\Core\Exception\OperationException;
+use Mukadi\Wallet\Core\Manager\AbstractSchemaManager;
+use Mukadi\Wallet\Core\Test\MinimuBalanceWalletManager;
+use Mukadi\Wallet\Core\Exception\AuthorizationException;
 
 class AbstractWalletManagerTest extends TestCase {
 
@@ -50,6 +52,12 @@ class AbstractWalletManagerTest extends TestCase {
         );
 
         $this->storage->method('saveEntry')->will(
+            $this->returnCallback(function ($e) {
+                return $e;
+            })
+        );
+
+        $this->storage->method('saveLien')->will(
             $this->returnCallback(function ($e) {
                 return $e;
             })
@@ -222,6 +230,7 @@ class AbstractWalletManagerTest extends TestCase {
         $w = new Wallet();
         $w->setCurrency('CDF');
         $w->setBalance(1000);
+        $w->setWalletId("WA01");
 
         $auth = new Authorization();
         $auth->setStatus(Codes::AUTH_STATUS_PENDING);
@@ -415,6 +424,8 @@ class AbstractWalletManagerTest extends TestCase {
         $auth = new Authorization();
         $auth->setStatus(Codes::AUTH_STATUS_PENDING);
         $auth->setPlatformId("PL01");
+        $auth->setOperationCode("DEPOSIT");
+        $auth->setOperationId('OP001');
         
 
         $batch = new Batch();
@@ -425,6 +436,8 @@ class AbstractWalletManagerTest extends TestCase {
             "WA01" => $w,
             "WA02" => $w2,
         ]);
+
+        $this->storage->method('getRelatedActiveLiens')->willReturn([]);
 
 
         $manager = new WalletManager($this->schema, $this->storage, Authorization::class);
@@ -450,6 +463,200 @@ class AbstractWalletManagerTest extends TestCase {
         $result = $manager->authorize($p);
 
         $this->assertEquals(Codes::AUTH_STATUS_REFUSED, $result->getStatus());
+    }
+
+    public function testExecuteWithLiensOnCashInOperation() {
+        $op = new Entry();
+        $op->setType(Codes::OPERATION_TYPE_CASH_IN);
+        $op->setCurrency('CDF');
+        $op->setAmount(1500);
+        $op->setTransactionCurrency('CDF');
+        $op->setTransactionCurrency(1500);
+        $op->setAppliedRate(1);
+        $op->setOperationCode("DEPOSIT");
+        $op->setOperationId('OP001');
+        $op->setAuthorizationId("A001");
+        $op->setSerialId(1);
+
+        $w = new Wallet();
+        $w->setCurrency('CDF');
+        $w->setBalance(1000);
+        $w->setWalletId("WA01");
+
+        $lien = Lien::createNewInstance($w->getWalletId(), 2000, 'compliance lock');
+
+        $this->storage->method('getRelatedActiveLiens')->willReturn([
+            $lien,
+        ]);
+
+        $manager = new WalletManager($this->schema, $this->storage, Authorization::class);
+
+        $execute = self::getProtectedMethod(WalletManager::class, 'execute');
+
+        /** @var Entry */
+        $op = $execute->invokeArgs($manager, [$op, $w]);
+
+        $this->assertNull($lien->getAuthorizationId());
+        $this->assertNotNull($w->getBalanceUpdatedAt());
+        $this->assertEquals($op->getBalance(), $w->getBalance());
+        $this->assertEquals($op->getBalance(), 2500);
+    }
+
+    public function testExecuteWithInvalidLiensOnCashInOperation() {
+        $op = new Entry();
+        $op->setType(Codes::OPERATION_TYPE_CASH_IN);
+        $op->setCurrency('CDF');
+        $op->setAmount(1500);
+        $op->setTransactionCurrency('CDF');
+        $op->setTransactionCurrency(1500);
+        $op->setAppliedRate(1);
+        $op->setOperationCode("DEPOSIT");
+        $op->setOperationId('OP001');
+        $op->setAuthorizationId("A001");
+        $op->setSerialId(1);
+
+        $w = new Wallet();
+        $w->setCurrency('CDF');
+        $w->setBalance(1000);
+        $w->setWalletId("WA01");
+
+        $lien = Lien::createNewInstance($w->getWalletId(), 2000, 'compliance lock');
+        $lien->setStatus(Codes::LIEN_STATUS_PENDING);
+
+        $this->storage->method('getRelatedActiveLiens')->willReturn([
+            $lien,
+        ]);
+
+        $manager = new WalletManager($this->schema, $this->storage, Authorization::class);
+
+        $this->expectException(EntryException::class);
+
+        $execute = self::getProtectedMethod(WalletManager::class, 'execute');
+
+        /** @var Entry */
+        $op = $execute->invokeArgs($manager, [$op, $w]);
+    }
+
+    public function testExecuteWithLiensOnCashOutOperation() {
+        $op = new Entry();
+        $op->setType(Codes::OPERATION_TYPE_CASH_OUT);
+        $op->setCurrency('CDF');
+        $op->setAmount(1500);
+        $op->setTransactionCurrency('CDF');
+        $op->setTransactionCurrency(1500);
+        $op->setAppliedRate(1);
+        $op->setOperationCode("DEPOSIT");
+        $op->setOperationId('OP001');
+        $op->setAuthorizationId("A001");
+        $op->setSerialId(1);
+
+        $w = new Wallet();
+        $w->setCurrency('CDF');
+        $w->setBalance(2000);
+        $w->setWalletId("WA01");
+
+        $lien = Lien::createNewInstance($w->getWalletId(), 1000, 'compliance lock');
+
+        $this->storage->method('getRelatedActiveLiens')->willReturn([
+            $lien,
+        ]);
+
+        $manager = new MinimuBalanceWalletManager($this->schema, $this->storage, Authorization::class, 0);
+
+        $execute = self::getProtectedMethod(WalletManager::class, 'execute');
+
+        $this->expectException(EntryException::class);
+
+        /** @var Entry */
+        $op = $execute->invokeArgs($manager, [$op, $w]);
+
+        $this->assertNull($lien->getAuthorizationId());
+    }
+
+    public function testExecuteWithOperationCodeMatchingLiensOnCashOutOperation() {
+        $OPCODE = "DEPOSIT";
+
+        $op = new Entry();
+        $op->setType(Codes::OPERATION_TYPE_CASH_OUT);
+        $op->setCurrency('CDF');
+        $op->setAmount(1000);
+        $op->setTransactionCurrency('CDF');
+        $op->setTransactionCurrency(1000);
+        $op->setAppliedRate(1);
+        $op->setOperationCode($OPCODE);
+        $op->setOperationId('OP001');
+        $op->setAuthorizationId("A001");
+        $op->setSerialId(1);
+
+        $w = new Wallet();
+        $w->setCurrency('CDF');
+        $w->setBalance(2000);
+        $w->setWalletId("WA01");
+
+        $lien = Lien::createNewInstance($w->getWalletId(), 1000,'compliance lock', $OPCODE );
+
+        $this->storage->method('getRelatedActiveLiens')->willReturn([
+            $lien,
+        ]);
+
+        $manager = new MinimuBalanceWalletManager($this->schema, $this->storage, Authorization::class, 0);
+
+        $execute = self::getProtectedMethod(WalletManager::class, 'execute');
+
+        /** @var Entry */
+        $op = $execute->invokeArgs($manager, [$op, $w]);
+
+        $this->assertEquals($op->getAuthorizationId(), $lien->getAuthorizationId());
+        $this->assertEquals($w->getBalance(), 1000);
+    }
+
+    public function testExecuteWithOperationIdMatchingLiensOnCashOutOperation() {
+        $OPCODE = "DEPOSIT";
+        $OPID = "OP001";
+
+        $op = new Entry();
+        $op->setType(Codes::OPERATION_TYPE_CASH_OUT);
+        $op->setCurrency('CDF');
+        $op->setAmount(1500);
+        $op->setTransactionCurrency('CDF');
+        $op->setTransactionCurrency(1500);
+        $op->setAppliedRate(1);
+        $op->setOperationCode($OPCODE);
+        $op->setOperationId($OPID);
+        $op->setAuthorizationId("A001");
+        $op->setSerialId(1);
+
+        $w = new Wallet();
+        $w->setCurrency('CDF');
+        $w->setBalance(2000);
+        $w->setWalletId("WA01");
+
+        $lien = Lien::createNewInstance($w->getWalletId(), 1000, 'compliance lock', $OPCODE);
+        $lien1 = Lien::createNewInstance($w->getWalletId(), 1500, 'compliance lock 2', $OPCODE, $OPID);
+        $lien2 = Lien::createNewInstance($w->getWalletId(), 100, 'compliance lock 3');
+
+        $this->storage->method('getRelatedActiveLiens')->willReturn([
+            $lien2,
+            $lien,
+            $lien1,
+        ]);
+
+        $manager = new MinimuBalanceWalletManager($this->schema, $this->storage, Authorization::class, 0);
+
+        $execute = self::getProtectedMethod(MinimuBalanceWalletManager::class, 'execute');
+
+        /** @var Entry */
+        $op = $execute->invokeArgs($manager, [$op, $w]);
+
+        $this->assertEquals($op->getAuthorizationId(), $lien1->getAuthorizationId());
+        $this->assertEquals($w->getBalance(), 500);
+        $this->assertEquals($lien1->getAmount(), 0);
+        $this->assertEquals($lien->getAmount(), 1000);
+        $this->assertEquals($lien->getSerialId(), 0);
+        $this->assertEquals($lien1->getSerialId(), $op->getSerialId());
+        $this->assertEquals(Codes::LIEN_STATUS_CONSUMED, $lien1->getStatus());
+        $this->assertEquals(Codes::LIEN_STATUS_ACTIVE, $lien->getStatus());
+        $this->assertEquals(Codes::LIEN_STATUS_ACTIVE, $lien2->getStatus());
     }
 
     protected static function getProtectedMethod($class, $name) {

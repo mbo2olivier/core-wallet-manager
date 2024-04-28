@@ -8,9 +8,11 @@
  */
 namespace Mukadi\Wallet\Core\Storage;
 
+use Mukadi\Wallet\Core\Lien;
 use Mukadi\Wallet\Core\WalletInterface;
 use Mukadi\Wallet\Core\HolderInterface;
 use Mukadi\Wallet\Core\AuthorizationInterface;
+use Mukadi\Wallet\Core\Codes;
 use Mukadi\Wallet\Core\EntryInterface;
 use Mukadi\Wallet\Core\PlatformInterface;
 use Mukadi\Wallet\Core\Instruction;
@@ -97,6 +99,45 @@ abstract class WalletStorageLayer
      * @throws StorageLayerException
      **/
     public abstract function saveAuthorization(AuthorizationInterface $auth, bool $autocommit = true): AuthorizationInterface;
+
+    /**
+     * save lien in the storage layer
+     * 
+     * @param Lien $lien 
+     * @param bool $autocommit
+     * @return Lien
+     * @throws StorageLayerException
+     **/
+    public abstract function saveLien(Lien $lien, bool $autocommit = true): Lien;
+
+    /**
+     * @param Lien $lien
+     * @param string $authorizationId
+     * @param int $serial
+     * @param bool $autocommit
+     * @return Lien
+     * @throws StorageLayerException
+     */
+    public function markReadyForConsumption(Lien $lien, string $authorizationId, int $serial, string $amount = null): Lien {
+        if ($lien->getStatus() !== Codes::LIEN_STATUS_ACTIVE) {
+            throw new StorageLayerException('cannot consume non active lien');
+        }
+
+        $amount ??= $lien->getAmount();
+        $lien->setAmount($lien->getAmount() - $amount);
+        $lien->setAuthorizationId($authorizationId);
+        $lien->setSerialId($serial);
+
+        if ($lien->getAmount() == 0) {
+            $lien->setStatus(Codes::LIEN_STATUS_CONSUMED);
+        }
+        
+        $this->validateLien($lien);
+        $lien = $this->saveLien($lien, false);
+        $this->onLienMarkedAsConsumed($lien);
+
+        return $lien;
+    }
 
     /**
      * getting wallet by criteria
@@ -198,10 +239,52 @@ abstract class WalletStorageLayer
     public abstract function listEntryBy(array $criteria): iterable;
 
     /**
+     * @return array<Lien>
+     */
+    protected abstract function getRelatedActiveLiens(string $walletId): array;
+
+    /**
+     * @return array<Lien>
+     */
+    public function getRelatedSortedActiveLiens(string $walletId): array {
+        $liens = $this->getRelatedActiveLiens($walletId);
+
+        usort($liens, function (Lien $a, Lien $b): int {
+            $res = $a->getOperationId() <=> $b->getOperationId();
+            if ($res !== 0 && (empty($a->getOperationId()) || empty($b->getOperationId()))) {
+                return $res;
+            }
+
+            $res = $a->getOperationCode() <=> $b->getOperationCode();
+            if ($res !== 0 && (empty($a->getOperationCode()) || empty($b->getOperationCode()))) {
+                return $res;
+            }
+
+            return $a->getCreatedAt() <=> $b->getCreatedAt();
+        });
+
+        return array_reverse($liens);
+    }
+
+    /**
      * @param string $code;
      * @return Instruction[]
      */
     public abstract function getInstructions($code): iterable;
+
+    public function createNewLien(string $walletId, string $amount, string $reason, ?string $operationCode = null, ?string $operationId = null): Lien {
+        $lien = Lien::createNewInstance($walletId, $amount, $reason, $operationCode, $operationId);
+        $this->validateLien($lien);
+        return $this->saveLien($lien, true);
+    }
+
+    protected function onLienMarkedAsConsumed(Lien $lien): void {}
+
+    protected function validateLien(Lien $lien) {
+        if ($lien->getAmount() < 0) {
+            throw new StorageLayerException('invalid lien amount: lien amount cannot be negative');
+        }
+    }
 
     /**
      * Adds support for magic method calls.

@@ -1,11 +1,8 @@
 <?php
 namespace Mukadi\Wallet\Core\Test;
 
-use Mukadi\Wallet\Core\Manager\AbstractWalletManager;
-use Mukadi\Wallet\Core\AuthorizationInterface;
-use Mukadi\Wallet\Core\EntryInterface;
 use Mukadi\Wallet\Core\WalletInterface;
-use Mukadi\Wallet\Core\OperationInterface;
+use Mukadi\Wallet\Core\Manager\AbstractWalletManager;
 
 class WalletManager extends AbstractWalletManager {
 

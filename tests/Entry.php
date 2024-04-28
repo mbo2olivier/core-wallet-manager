@@ -45,6 +45,9 @@ class Entry  implements EntryInterface
     /** @var  string */
     protected $exchangeRate;
 
+    protected ?string $operationCode;
+    protected ?string $operationId;
+
     public function __construct(int $id = 1, $amount = 0, $currency = '', $label = '', $type = '', $wallet = '')
     {
         $this->serialId = $id;
@@ -177,4 +180,44 @@ class Entry  implements EntryInterface
      */
     public function setAppliedRate(?string $rate) { $this->appliedRate = $rate; }
 
+
+    /**
+     * Get the value of operationCode
+     */ 
+    public function getOperationCode(): ?string
+    {
+        return $this->operationCode;
+    }
+
+    /**
+     * Set the value of operationCode
+     *
+     * @return  self
+     */ 
+    public function setOperationCode(?string $operationCode)
+    {
+        $this->operationCode = $operationCode;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of operationId
+     */ 
+    public function getOperationId(): ?string
+    {
+        return $this->operationId;
+    }
+
+    /**
+     * Set the value of operationId
+     *
+     * @return  self
+     */ 
+    public function setOperationId(?string $operationId)
+    {
+        $this->operationId = $operationId;
+
+        return $this;
+    }
 }

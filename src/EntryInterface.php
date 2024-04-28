@@ -135,4 +135,21 @@ interface EntryInterface
      * @param string $rate
      */
     public function setAppliedRate(string $rate);
+
+    /**
+     * @return string|null
+     */
+    public function getOperationCode(): ?string;
+    /**
+     * @param string|null $code
+     */
+    public function setOperationCode(?string $code);
+    /**
+     * @return string|null
+     */
+    public function getOperationId(): ?string;
+    /**
+     * @param string|null $id
+     */
+    public function setOperationId(?string $id);
 }

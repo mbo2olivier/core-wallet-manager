@@ -18,7 +18,7 @@ class WalletStorageLayerTest extends Testcase {
     protected function setUp(): void {
         $this->storage = $this
             ->getMockBuilder(WalletStorageLayer::class)
-            ->onlyMethods(['beginTransaction','commit','rollback','saveWallet','saveEntry','saveHolder','saveAuthorization','findWalletBy','findEntryBy','findHolderBy','findAuthorizationBy','findSchemaBy','getPlatform','listEntryBy', 'getInstructions', 'findAllWalletsById', 'findPreviousAuthorization', 'getSchema', 'getWallet'])
+            ->onlyMethods(['beginTransaction','commit','rollback','saveWallet','saveEntry','saveHolder','saveAuthorization','findWalletBy','findEntryBy','findHolderBy','findAuthorizationBy','findSchemaBy','getPlatform','listEntryBy', 'getInstructions', 'findAllWalletsById', 'findPreviousAuthorization', 'getSchema', 'getWallet', 'saveLien', 'getRelatedActiveLiens'])
             ->getMock()
         ;
     }

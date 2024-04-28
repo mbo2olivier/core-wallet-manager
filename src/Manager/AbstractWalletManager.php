@@ -14,11 +14,13 @@ use Mukadi\Wallet\Core\Codes;
 use Mukadi\Wallet\Core\AuthorizationInterface;
 use Mukadi\Wallet\Core\BatchInterface;
 use Mukadi\Wallet\Core\EntryInterface;
+use Mukadi\Wallet\Core\Lien;
 use Mukadi\Wallet\Core\Exception\EntryException;
 use Mukadi\Wallet\Core\WalletInterface;
 use Mukadi\Wallet\Core\Exception\WalletException;
 use Mukadi\Wallet\Core\Exception\StorageLayerException;
 use Mukadi\Wallet\Core\Operation;
+use Mukadi\Wallet\Core\OperationExecutionIntent;
 use Mukadi\Wallet\Core\ProcessingEntry;
 use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
 
@@ -176,6 +178,8 @@ abstract class AbstractWalletManager
                 foreach($processings as $ew) {
                     $op = $ew->entry;
                     $op->setAuthorizationId($auth->getAuthorizationId());
+                    $op->setOperationCode($auth->getOperationCode());
+                    $op->setOperationId($auth->getOperationId());
                     $op->setDate(new \DateTimeImmutable('now'));
                     $op->setPlatformId($auth->getPlatformId());
 
@@ -248,7 +252,55 @@ abstract class AbstractWalletManager
             throw new EntryException(sprintf("applied exchange rate not defined", $op->getCurrency()), $op);
         }
 
-        $this->beforeExecuteOperation($op, $wallet);
+        $liens = $this->storage->getRelatedSortedActiveLiens($wallet->getWalletId());
+        $retainedLiens = [];
+        $remainingAmount = $op->getAmount();
+
+        foreach ($liens as $lien) {
+
+            if ($lien->getStatus() !== Codes::LIEN_STATUS_ACTIVE) {
+                throw new EntryException("'{$lien->getReason()}' is not an active lien", $op);
+            }
+
+            if ($op->getType() === Codes::OPERATION_TYPE_CASH_IN) {
+                $retainedLiens[] = $lien;
+                continue;
+            }
+
+            if (!$lien->getOperationCode()) {
+                $retainedLiens[] = $lien;
+                continue;
+            }
+            
+            if ($lien->getOperationCode() != $op->getOperationCode()) {
+                $retainedLiens[] = $lien;
+                continue;
+            }
+
+            if ($lien->getOperationId() && $lien->getOperationId() !== $op->getOperationId()) {
+                $retainedLiens[] = $lien;
+                continue;
+            }
+
+            if ($remainingAmount <= 0) {
+                continue;
+            }
+
+            if ($remainingAmount >= $lien->getAmount()) {
+                $lamt = $lien->getAmount();
+                $this->storage->markReadyForConsumption($lien, $op->getAuthorizationId(), $op->getSerialId());
+                $remainingAmount -= $lamt;
+            }
+            else {
+                $this->storage->markReadyForConsumption($lien, $op->getAuthorizationId(), $op->getSerialId(), $remainingAmount);
+                $remainingAmount = 0;
+            }
+
+        }
+        
+
+        $availableBalance = array_reduce($retainedLiens, fn ($b, Lien $l) => $b - $l->getAmount(), $wallet->getBalance());
+        $this->beforeExecuteOperation(new OperationExecutionIntent($op, $wallet, $availableBalance, $retainedLiens));
 
         $outcome = $op->getType() === Codes::OPERATION_TYPE_CASH_IN ? ($wallet->getBalance() + $op->getAmount()) : ($wallet->getBalance() - $op->getAmount());
         $op->setExecutedAt(new \DateTimeImmutable('now'));
@@ -275,11 +327,10 @@ abstract class AbstractWalletManager
     }
 
     /**
-     * @param EntryInterface $op 
-     * @param WalletInterface $w
+     * @param OperationExecutionIntent $intent 
      * @throws EntryException
      */
-    protected function beforeExecuteOperation(EntryInterface $op, WalletInterface $w) {}
+    protected function beforeExecuteOperation(OperationExecutionIntent $intent) {}
 
     /**
      * @param EntryInterface $op 

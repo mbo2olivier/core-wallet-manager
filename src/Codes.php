@@ -16,6 +16,11 @@ class Codes
 {
     const SYSTEM_VALIDATOR = "SYSTEM";
 
+    const LIEN_STATUS_PENDING = "P";
+    const LIEN_STATUS_ACTIVE = "A";
+    const LIEN_STATUS_CANCELED = "C";
+    const LIEN_STATUS_CONSUMED = "S";
+
     const OPERATION_TYPE_CASH_IN = "C";
     const OPERATION_TYPE_CASH_OUT = "D";
 

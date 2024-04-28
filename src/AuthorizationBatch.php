@@ -15,7 +15,7 @@ namespace Mukadi\Wallet\Core;
 final class AuthorizationBatch  implements BatchInterface
 {
     protected bool $_isDoubleEntry;
-    /** @var array<Entry>  */
+    /** @var array<EntryInterface>  */
     protected iterable $_entries;
 
     public function __construct(private AuthorizationInterface $auth, iterable $entries,bool $isDoubleEntry = true)

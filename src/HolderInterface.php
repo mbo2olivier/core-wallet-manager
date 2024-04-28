@@ -43,7 +43,7 @@ interface HolderInterface {
      */
     public function getCreatedAt(): \DateTimeImmutable;
     /**
-     * @param \DateTDateTimeImmutableime $date
+     * @param \DateTimeImmutable $date
      */
     public function setCreatedAt(\DateTimeImmutable $date);
     /**
