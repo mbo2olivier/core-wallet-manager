@@ -18,7 +18,7 @@ class Lien {
 
     /** @var  int */
     protected ?int $serialId = 0;
-    private ?string $reason = null;
+    protected ?string $reason = null;
 
     /** @var  double */
     protected ?string $amount = null;
@@ -26,7 +26,7 @@ class Lien {
     /** @var  double */
     protected ?string $originalAmount = null;
 
-    private ?string $walletId = null;
+    protected ?string $walletId = null;
 
     /** @var  ?\DateTimeImmutable null|\DateTimeImmutable */
     protected ?\DateTimeImmutable $createdAt = null;
