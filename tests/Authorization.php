@@ -62,6 +62,8 @@ class Authorization  implements AuthorizationInterface
     /** @var  string */
     protected string $authorizationRequestId;
 
+    protected $exchangeRate;
+
     /**
      * @return \DateTimeImmutable
      */
@@ -186,4 +188,13 @@ class Authorization  implements AuthorizationInterface
 
         return $this;
     }
+
+    /**
+     * @return null|string
+     */
+    public function getExchangeRate(): ?string { return $this->exchangeRate; }
+    /**
+     * @param string $rate
+     */
+    public function setExchangeRate(?string $rate) { $this->exchangeRate = $rate; }
 }

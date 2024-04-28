@@ -180,7 +180,7 @@ abstract class AbstractWalletManager
                 if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b != 0)) > 0) {
                     throw new AuthorizationException($auth, "your entries are not balanced");
                 }
-                $processings = $self->beforeEntryProcessing($processings);
+                $processings = $self->beforeEntryProcessing($processings, $auth);
                 
                 foreach($processings as $ew) {
                     $op = $ew->entry;
@@ -189,6 +189,7 @@ abstract class AbstractWalletManager
                     $op->setOperationId($auth->getOperationId());
                     $op->setDate(new \DateTimeImmutable('now'));
                     $op->setPlatformId($auth->getPlatformId());
+                    $op->setExchangeRate($auth->getExchangeRate());
 
                     $self->execute($op, $ew->wallet);
                 }
@@ -222,7 +223,7 @@ abstract class AbstractWalletManager
             $this->storage->saveAuthorization($auth);
             $this->onAuthorizationRefused($auth);
 
-            throw new AuthorizationException($auth, "an error occured while processing yuour request", $e);
+            throw new AuthorizationException($auth, "an error occured while processing your request", $e);
         }
     }
 
@@ -321,7 +322,7 @@ abstract class AbstractWalletManager
      * @return ProcessingEntry[]
      * @throws EntryException
      */
-    protected function beforeEntryProcessing(array $entries): array {
+    protected function beforeEntryProcessing(array $entries, ?AuthorizationInterface $auth = null): array {
         return $entries;
     }
 

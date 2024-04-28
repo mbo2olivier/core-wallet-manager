@@ -125,4 +125,12 @@ interface AuthorizationInterface
     public function getCommissionCurrency(): string;
 
     public function setCommissionCurrency(string $currency);
+    /**
+     * @return null|string
+     */
+    public function getExchangeRate(): ?string;
+    /**
+     * @param string $rate
+     */
+    public function setExchangeRate(?string $rate);
 }

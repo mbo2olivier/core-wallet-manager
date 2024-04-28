@@ -47,4 +47,6 @@ abstract class Operation
     abstract function getCommissionCurrency(): string;
 
     abstract function getCommissionAmount(): string;
+
+    abstract function getExchangeRate(): ?string;
 }

@@ -17,6 +17,8 @@ class Payment extends Operation {
 
     public string $cionsCurrency;
 
+    protected $exchangeRate = "NOR";
+
     public function __construct(private ?string $code = null)
     {
         
@@ -75,4 +77,13 @@ class Payment extends Operation {
     public function getCommissionAmount(): string { return $this->cionsCurrency; }
 
     public function getAuthorizationRequestId(): ?string { return $this->requestId; }
+
+    /**
+     * @return null|string
+     */
+    public function getExchangeRate(): ?string { return $this->exchangeRate; }
+    /**
+     * @param string $rate
+     */
+    public function setExchangeRate(?string $rate) { $this->exchangeRate = $rate; }
 }
