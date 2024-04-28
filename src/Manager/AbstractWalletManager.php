@@ -163,6 +163,7 @@ abstract class AbstractWalletManager
                 $wallets = $storage->findAllWalletsById($ids);
                 /** @var array<ProcessingEntry> */
                 $processings = [];
+                $balances = [];
 
                 foreach ($entries as $e) {
                     if (!isset($wallets[$e->getWalletId()])) {
@@ -170,11 +171,17 @@ abstract class AbstractWalletManager
                     }
 
                     $processings[] = new ProcessingEntry($e, $wallets[$e->getWalletId()]);
+
+                    $balance = isset($balances[$e->getCurrency()]) ? $balances[$e->getCurrency()] : 0;
+                    $balance += ($e->getType() == Codes::OPERATION_TYPE_CASH_IN ? 1 : -1) * $e->getAmount();
+                    $balances[$e->getCurrency()] = $balance;
                 }
 
+                if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b != 0)) > 0) {
+                    throw new AuthorizationException($auth, "your entries are not balanced");
+                }
                 $processings = $self->beforeEntryProcessing($processings);
-
-                $balances = [];
+                
                 foreach($processings as $ew) {
                     $op = $ew->entry;
                     $op->setAuthorizationId($auth->getAuthorizationId());
@@ -183,15 +190,7 @@ abstract class AbstractWalletManager
                     $op->setDate(new \DateTimeImmutable('now'));
                     $op->setPlatformId($auth->getPlatformId());
 
-                    $balance = isset($balances[$op->getCurrency()]) ? $balances[$op->getCurrency()] : 0;
-                    $balance += ($op->getType() == Codes::OPERATION_TYPE_CASH_IN ? 1 : -1) * $op->getAmount();
-                    $balances[$op->getCurrency()] = $balance;
-
                     $self->execute($op, $ew->wallet);
-                }
-
-                if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b != 0)) > 0) {
-                    throw new AuthorizationException($auth, "your entries are not balanced");
                 }
 
                 $auth->setStatus(Codes::AUTH_STATUS_ACCEPTED);
