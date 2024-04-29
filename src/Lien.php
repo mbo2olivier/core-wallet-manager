@@ -11,10 +11,10 @@ namespace Mukadi\Wallet\Core;
 class Lien {
 
     /** @var  string */
-    protected $authorizationId = null;
+    protected ?string $authorizationId = null;
 
     /** @var  string */
-    protected $platformId = null;
+    protected ?string $platformId = null;
 
     /** @var  int */
     protected ?int $serialId = 0;
@@ -59,7 +59,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setReason($reason)
+    public function setReason(string $reason): self
     {
         $this->reason = $reason;
 
@@ -69,7 +69,7 @@ class Lien {
     /**
      * Get the value of wallet
      */ 
-    public function getWalletId(): ?string
+    public function getWalletId(): string
     {
         return $this->walletId;
     }
@@ -79,7 +79,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setWalletId(string $walletId)
+    public function setWalletId(string $walletId): self
     {
         $this->walletId = $walletId;
 
@@ -93,7 +93,11 @@ class Lien {
     /**
      * @param double $amount
      */
-    public function setAmount(string $amount) { $this->amount = $amount; }
+    public function setAmount(string $amount): self 
+    {
+        $this->amount = $amount;
+        return $this;
+    }
 
         /**
      * @return double
@@ -102,7 +106,11 @@ class Lien {
     /**
      * @param double $amount
      */
-    public function setOriginalAmount(string $amount) { $this->originalAmount = $amount; }
+    public function setOriginalAmount(string $amount): self 
+    {
+        $this->originalAmount = $amount; 
+        return $this;
+    }
 
     /**
      * @return \DateTimeImmutable
@@ -111,9 +119,12 @@ class Lien {
     /**
      * @param \DateTimeImmutable $date
      */
-    public function setCreatedAt(\DateTimeImmutable|null $date) { $this->createdAt = $date; }
+    public function setCreatedAt(?\DateTimeImmutable $date): self {
+        $this->createdAt = $date;
+        return $this;
+    }
 
-     /**
+    /**
      * Get the value of operationCode
      */ 
     public function getOperationCode(): ?string
@@ -126,7 +137,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setOperationCode(?string $operationCode)
+    public function setOperationCode(?string $operationCode): self
     {
         $this->operationCode = $operationCode;
 
@@ -146,7 +157,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setOperationId(?string $operationId)
+    public function setOperationId(?string $operationId): self
     {
         $this->operationId = $operationId;
 
@@ -160,7 +171,12 @@ class Lien {
     /**
      * @param string $id
      */
-    public function setSerialId(?int $id) { $this->serialId = $id; }
+    public function setSerialId(?int $id): self 
+    {
+        $this->serialId = $id;
+
+        return $this;
+    }
 
     /**
      * @return string
@@ -169,7 +185,11 @@ class Lien {
     /**
      * @param string $authId
      */
-    public function setAuthorizationId(?string $authId) { $this->authorizationId = $authId; }
+    public function setAuthorizationId(?string $authId): self 
+    { 
+        $this->authorizationId = $authId; 
+        return $this;
+    }
 
     /**
      * Get the value of closededAt
@@ -184,7 +204,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setClosedAt(?\DateTimeImmutable $closedAt)
+    public function setClosedAt(?\DateTimeImmutable $closedAt): self
     {
         $this->closedAt = $closedAt;
 
@@ -206,7 +226,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setActivatedAt(?\DateTimeImmutable $activatedAt)
+    public function setActivatedAt(?\DateTimeImmutable $activatedAt): self
     {
         $this->activatedAt = $activatedAt;
 
@@ -226,7 +246,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setActivatedBy(?string $activatedBy)
+    public function setActivatedBy(?string $activatedBy): self
     {
         $this->activatedBy = $activatedBy;
 
@@ -286,7 +306,7 @@ class Lien {
      *
      * @return  self
      */ 
-    public function setPlatformId(string $platformId)
+    public function setPlatformId(string $platformId): self
     {
         $this->platformId = $platformId;
 

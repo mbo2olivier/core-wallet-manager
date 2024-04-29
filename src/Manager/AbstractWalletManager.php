@@ -163,7 +163,6 @@ abstract class AbstractWalletManager
                 $wallets = $storage->findAllWalletsById($ids);
                 /** @var array<ProcessingEntry> */
                 $processings = [];
-                $balances = [];
 
                 foreach ($entries as $e) {
                     if (!isset($wallets[$e->getWalletId()])) {
@@ -171,17 +170,22 @@ abstract class AbstractWalletManager
                     }
 
                     $processings[] = new ProcessingEntry($e, $wallets[$e->getWalletId()]);
-
-                    $balance = isset($balances[$e->getCurrency()]) ? $balances[$e->getCurrency()] : 0;
-                    $balance += ($e->getType() == Codes::OPERATION_TYPE_CASH_IN ? 1 : -1) * $e->getAmount();
-                    $balances[$e->getCurrency()] = $balance;
                 }
+
+                $processings = $self->beforeEntryProcessing($processings, $auth);
+
+                $balances = array_reduce($entries, function (array $b, EntryInterface $e) {
+                    $balance = isset($b[$e->getCurrency()]) ? $b[$e->getCurrency()] : 0;
+                    $balance += ($e->getType() == Codes::OPERATION_TYPE_CASH_IN ? 1 : -1) * $e->getAmount();
+                    $b[$e->getCurrency()] = $balance;
+
+                    return $b;
+                }, []);
 
                 if ($batch->isDoubleEntry() && \count(array_filter($balances, fn ($b) => $b != 0)) > 0) {
                     throw new AuthorizationException($auth, "your entries are not balanced");
                 }
-                $processings = $self->beforeEntryProcessing($processings, $auth);
-                
+
                 foreach($processings as $ew) {
                     $op = $ew->entry;
                     $op->setAuthorizationId($auth->getAuthorizationId());
