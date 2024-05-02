@@ -10,6 +10,7 @@ use Mukadi\Wallet\Core\EntryInterface;
 use Mukadi\Wallet\Core\PlatformInterface;
 use Mukadi\Wallet\Core\SchemaInterface;
 use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
+use Mukadi\Wallet\Core\Test\ImplementedLien;
 
 class WalletStorageLayerTest extends Testcase {
 
@@ -18,7 +19,7 @@ class WalletStorageLayerTest extends Testcase {
     protected function setUp(): void {
         $this->storage = $this
             ->getMockBuilder(WalletStorageLayer::class)
-            ->onlyMethods(['beginTransaction','commit','rollback','saveWallet','saveEntry','saveHolder','saveAuthorization','findWalletBy','findEntryBy','findHolderBy','findAuthorizationBy','findSchemaBy','getPlatform','listEntryBy', 'getInstructions', 'findAllWalletsById', 'findPreviousAuthorization', 'getSchema', 'getWallet', 'saveLien', 'getRelatedActiveLiens'])
+            ->onlyMethods(['beginTransaction','commit','rollback','saveWallet','saveEntry','saveHolder','saveAuthorization','findWalletBy','findEntryBy','findHolderBy','findAuthorizationBy','findSchemaBy','getPlatform','listEntryBy', 'getInstructions', 'findAllWalletsById', 'findPreviousAuthorization', 'getSchema', 'getWallet', 'saveLien', 'getRelatedActiveLiens', 'getLienConcreteClass'])
             ->getMock()
         ;
     }
@@ -122,5 +123,24 @@ class WalletStorageLayerTest extends Testcase {
         $this->expectException(\BadMethodCallException::class);
 
         $this->storage->findAuthByAuthorizationId("WA44");
+    }
+
+    public function testCreateNewLien() {
+        $this->storage->method('saveLien')->will(
+            $this->returnCallback(function ($e) {
+                return $e;
+            })
+        );
+
+        $this->storage
+            ->method('getLienConcreteClass')
+            ->willReturn(ImplementedLien::class)
+        ;
+
+        $lien = $this->storage->createNewLien("WA1", 2000, 'compliance lock');
+
+        $this->assertInstanceOf(ImplementedLien::class, $lien);
+        $this->assertEquals($lien->getOriginalAmount(), 2000);
+        $this->assertEquals($lien->getReason(), 'compliance lock');
     }
 }

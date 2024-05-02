@@ -314,7 +314,7 @@ class Lien {
     }
 
     public static function createNewInstance(string $walletId, string $amount, string $reason, ?string $operationCode = null, ?string $operationId = null): static {
-        $lien = new self;
+        $lien = new static();
         $lien->setWalletId($walletId);
         $lien->setOriginalAmount($amount);
         $lien->setAmount($amount);
