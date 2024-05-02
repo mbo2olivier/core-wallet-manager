@@ -272,10 +272,15 @@ abstract class WalletStorageLayer
      */
     public abstract function getInstructions($code): iterable;
 
-    public function createNewLien(string $walletId, string $amount, string $reason, ?string $operationCode = null, ?string $operationId = null): Lien {
+    public function createNewLien(string $walletId, string $amount, string $reason, ?string $operationCode = null, ?string $operationId = null, bool $autosave = true): Lien {
         $lien = \call_user_func([$this->getLienConcreteClass(), 'createNewInstance'], $walletId, $amount, $reason, $operationCode, $operationId);
         $this->validateLien($lien);
-        return $this->saveLien($lien, true);
+
+        if ($autosave) {
+            return $this->saveLien($lien, true);
+        }
+        
+        return $lien;
     }
 
     protected function onLienMarkedAsConsumed(Lien $lien): void {}
