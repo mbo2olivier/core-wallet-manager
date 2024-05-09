@@ -119,6 +119,7 @@ abstract class AbstractWalletManager
             $auth->setCurrency($r->getCurrency());
             $auth->setCommissionAmount($r->getCommissionAmount());
             $auth->setCommissionCurrency($r->getCommissionCurrency());
+            $auth->setExchangeRate($r->getExchangeRate());
             $auth->setStatus(Codes::AUTH_STATUS_PENDING);
             
             $auth = $this->beforeAuthorizationInit($auth);
@@ -170,6 +171,13 @@ abstract class AbstractWalletManager
                         throw new EntryException(sprintf('cannot find wallet with id %s', $e->getWalletId()));
                     }
 
+                    $e->setAuthorizationId($auth->getAuthorizationId());
+                    $e->setOperationCode($auth->getOperationCode());
+                    $e->setOperationId($auth->getOperationId());
+                    $e->setDate(new \DateTimeImmutable('now'));
+                    $e->setPlatformId($auth->getPlatformId());
+                    $e->setExchangeRate($auth->getExchangeRate());
+
                     $processings[] = new ProcessingEntry($e, $wallets[$e->getWalletId()]);
 
                     $balance = isset($balances[$e->getTransactionCurrency()]) ? $balances[$e->getTransactionCurrency()] : 0;
@@ -184,15 +192,7 @@ abstract class AbstractWalletManager
                 }
 
                 foreach($processings as $ew) {
-                    $op = $ew->entry;
-                    $op->setAuthorizationId($auth->getAuthorizationId());
-                    $op->setOperationCode($auth->getOperationCode());
-                    $op->setOperationId($auth->getOperationId());
-                    $op->setDate(new \DateTimeImmutable('now'));
-                    $op->setPlatformId($auth->getPlatformId());
-                    $op->setExchangeRate($auth->getExchangeRate());
-
-                    $self->execute($op, $ew->wallet);
+                    $self->execute($ew->entry, $ew->wallet);
                 }
 
                 $auth->setStatus(Codes::AUTH_STATUS_ACCEPTED);

@@ -15,10 +15,10 @@ class Authorization  implements AuthorizationInterface
     protected string $authorizationId;
 
     /** @var  string */
-    protected null|string $operationId;
+    protected null|string $operationId = null;
 
     /** @var  string */
-    protected ?string $operationCode;
+    protected ?string $operationCode = null;
 
     /** @var  string */
     protected string $status;
