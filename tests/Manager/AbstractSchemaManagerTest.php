@@ -1,16 +1,19 @@
 <?php
 namespace Mukadi\Wallet\Core\Test\Manager;
 
-use PHPUnit\Framework\TestCase;
 use Mukadi\Wallet\Core\Codes;
-use Mukadi\Wallet\Core\AuthorizationInterface;
-use Mukadi\Wallet\Core\Instruction;
-use Mukadi\Wallet\Core\SchemaInterface;
-use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
+use PHPUnit\Framework\TestCase;
 use Mukadi\Wallet\Core\Test\Entry;
-use Mukadi\Wallet\Core\Test\Payment;
-use Mukadi\Wallet\Core\Test\SchemaManager;
+use Mukadi\Wallet\Core\Instruction;
 use Mukadi\Wallet\Core\Test\Wallet;
+use Mukadi\Wallet\Core\Test\Payment;
+use Mukadi\Wallet\Core\SchemaInterface;
+use Mukadi\Wallet\Core\Test\SchemaManager;
+use Mukadi\Wallet\Core\AuthorizationInterface;
+use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
+use Mukadi\Wallet\Core\Expression\ExpressionLanguage;
+use Symfony\Component\ExpressionLanguage\ExpressionFunction;
+use Symfony\Component\ExpressionLanguage\ExpressionFunctionProviderInterface;
 
 class AbstractSchemaManagerTest extends TestCase {
 
@@ -98,8 +101,8 @@ class AbstractSchemaManagerTest extends TestCase {
             ->willReturn($w)
         ;
 
-        $this->manager = new SchemaManager($storage, Entry::class);
-        $this->manager->registerFx('upper',new UpperFx);
+        $exp = new ExpressionLanguage(null, [new ExpFunctions]);
+        $this->manager = new SchemaManager($storage, Entry::class, $exp);
     }
 
     /** @test */
@@ -126,9 +129,21 @@ class AbstractSchemaManagerTest extends TestCase {
 }
 
 
-class UpperFx {
+class ExpFunctions implements ExpressionFunctionProviderInterface {
 
-    public function __invoke($a, $label) {
-        return \strtoupper($label);
+    public function getFunctions(): array
+    {
+        return [
+            new ExpressionFunction('upper', function ($str): string {
+                return sprintf('(is_string(%1$s) ? strtoupper(%1$s) : %1$s)', $str);
+            },
+            function ($arguments, $str): string {
+                if (!is_string($str)) {
+                    return $str;
+                }
+
+                return \strtoupper($str);
+            }),
+        ];
     }
 }

@@ -118,7 +118,7 @@ abstract class WalletStorageLayer
      * @return Lien
      * @throws StorageLayerException
      */
-    public function markReadyForConsumption(Lien $lien, string $authorizationId, int $serial, string $amount = null): Lien {
+    public function markReadyForConsumption(Lien $lien, string $authorizationId, int $serial, ?string $amount = null): Lien {
         if ($lien->getStatus() !== Codes::LIEN_STATUS_ACTIVE) {
             throw new StorageLayerException('cannot consume non active lien');
         }

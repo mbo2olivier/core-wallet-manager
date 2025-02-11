@@ -19,7 +19,7 @@ class EntryException extends \Exception
     /** @var EntryInterface|null $operation */
     protected ?EntryInterface $operation;
 
-    public function __construct($message, EntryInterface $operation = null) {
+    public function __construct($message, ?EntryInterface $operation = null) {
         parent::__construct($message);
         $this->operation = $operation;
     }

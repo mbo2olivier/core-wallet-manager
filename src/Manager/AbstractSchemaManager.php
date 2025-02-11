@@ -11,7 +11,6 @@ namespace Mukadi\Wallet\Core\Manager;
 use Mukadi\Wallet\Core\Expression\Proxy;
 use Mukadi\Wallet\Core\EntryInterface;
 use Mukadi\Wallet\Core\Exception\SchemaException;
-use Mukadi\Wallet\Core\Exception\WalletException;
 use Mukadi\Wallet\Core\Instruction;
 use Mukadi\Wallet\Core\Operation;
 use Mukadi\Wallet\Core\Storage\WalletStorageLayer;
@@ -41,13 +40,15 @@ abstract class AbstractSchemaManager
      * @param WalletStorageLayer $storage
      * @param string $class
      */
-    public function __construct(WalletStorageLayer $storage, $class) {
+    public function __construct(WalletStorageLayer $storage, $class, ?ExpressionLanguage $exp = null) {
         $this->storage = $storage;
         $this->entryClass = $class;
-        $this->exp = new ExpressionLanguage();
-        $this->registerUtilityFunctions();
+        $this->exp = $exp ?? new \Mukadi\Wallet\Core\Expression\ExpressionLanguage();
     }
 
+    /**
+     * @deprecated nject a customized ExpressionLanguage in constructor instead
+     */
     public function registerFx($name, callable $fx) {
         $this->exp->register($name, fn () => "", $fx);
         
@@ -69,7 +70,7 @@ abstract class AbstractSchemaManager
         $inst = $this->storage->getInstructions($operation->getSchemaId());
         $class = $this->entryClass;
         $proxy = new Proxy($operation);
-        $iargs = ["t" => $proxy,];
+        $iargs = ["t" => $proxy, 'storage' => $this->storage];
         $serial = 1;
         foreach($inst as $i) {
             /** @var EntryInterface $op */
@@ -91,21 +92,5 @@ abstract class AbstractSchemaManager
             $serial++;
         }
         return $ops;
-    }
-
-    private function registerUtilityFunctions() {
-
-        $storage = $this->storage;
-        
-        $this->registerFx('publicId', function (array $args, string $id) use ($storage) {
-            //var_dump($id);
-            $wallet  = $storage->findWalletBy(['walletPublicId' => $id]);
-
-            if (null === $wallet) {
-                throw new WalletException(sprintf('the wallet with public Id: %s doesn\'t exist', $id));
-            }
-
-            return $wallet->getWalletId();
-        });
     }
 }

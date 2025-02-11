@@ -17,9 +17,9 @@ use Mukadi\Wallet\Core\AuthorizationInterface;
  */
 class AuthorizationException extends \Exception 
 {
-    public function __construct(private AuthorizationInterface $auth, string $message, \Throwable $previuous = null)
+    public function __construct(private AuthorizationInterface $auth, string $message, ?\Throwable $previous = null)
     {
-        parent::__construct($message, 0, $previuous);
+        parent::__construct($message, 0, $previous);
     }
 
     public function getAuthorization(): AuthorizationInterface {
