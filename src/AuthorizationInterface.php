@@ -17,11 +17,11 @@ interface AuthorizationInterface
     /**
      * @return \DateTimeImmutable
      */
-    public function getDate(): \DateTimeImmutable;
+    public function getDate(): ?\DateTimeImmutable;
     /**
      * @param \DateTimeImmutable $date
      */
-    public function setDate(\DateTimeImmutable $date);
+    public function setDate(?\DateTimeImmutable $date);
 
     /**
      * @return string|null
@@ -133,4 +133,12 @@ interface AuthorizationInterface
      * @param string $rate
      */
     public function setExchangeRate(?string $rate);
+    /**
+     * @return \DateTimeImmutable|null
+     */
+    public function getValueDate(): ?\DateTimeImmutable;
+    /**
+     * @param \DateTimeImmutable|null $date
+     */
+    public function setValueDate(?\DateTimeImmutable $date);
 }

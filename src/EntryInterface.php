@@ -152,4 +152,12 @@ interface EntryInterface
      * @param string|null $id
      */
     public function setOperationId(?string $id);
+    /**
+     * @return \DateTimeImmutable
+     */
+    public function getValueDate(): ?\DateTimeImmutable;
+    /**
+     * @param \DateTimeImmutable $date
+     */
+    public function setValueDate(?\DateTimeImmutable $date);
 }

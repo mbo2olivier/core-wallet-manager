@@ -7,6 +7,8 @@
  * file that was distributed with this source code.
  */
 namespace Mukadi\Wallet\Core;
+
+use DateTimeImmutable;
 /**
  * Class Request.
  * 
@@ -24,29 +26,31 @@ abstract class Operation
         $this->authorizationId = $authorizationId;
     }
 
-    abstract function getSchemaId(): ?string;
+    abstract public function getSchemaId(): ?string;
 
-    abstract function getOperationId(): ?string;
+    abstract public function getOperationId(): ?string;
 
-    abstract function getOperationCode(): ?string;
+    abstract public function getOperationCode(): ?string;
 
-    abstract function getAuthorizationRequestId(): ?string;
+    abstract public function getAuthorizationRequestId(): ?string;
 
-    abstract function getHolderId(): ?string;
+    abstract public function getHolderId(): ?string;
 
-    abstract function getPlatformId(): ?string;
+    abstract public function getPlatformId(): ?string;
 
-    abstract function hasDoubleEntrySupport(): bool;
+    abstract public function hasDoubleEntrySupport(): bool;
 
-    abstract function getDescription(): ?string;
+    abstract public function getDescription(): ?string;
 
-    abstract function getTransactionAmount(): string;
+    abstract public function getTransactionAmount(): string;
 
-    abstract function getCurrency(): string;
+    abstract public function getCurrency(): string;
 
-    abstract function getCommissionCurrency(): string;
+    abstract public function getCommissionCurrency(): string;
 
-    abstract function getCommissionAmount(): string;
+    abstract public function getCommissionAmount(): string;
 
-    abstract function getExchangeRate(): ?string;
+    abstract public function getExchangeRate(): ?string;
+    abstract public function getDate(): ?DateTimeImmutable;
+    abstract public function getValueDate(): ?DateTimeImmutable;
 }

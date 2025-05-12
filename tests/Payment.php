@@ -19,6 +19,12 @@ class Payment extends Operation {
 
     protected $exchangeRate = "NOR";
 
+    protected ?\DateTimeImmutable $date = null;
+    protected ?\DateTimeImmutable $valueDate    = null;
+    public function getDate(): ?\DateTimeImmutable { return $this->date; }
+    public function setDate(?\DateTimeImmutable $date) { $this->date = $date; }
+    public function getWalletId(): string { return $this->walletId; }
+
     public function __construct(private ?string $code = null)
     {
         
@@ -86,4 +92,24 @@ class Payment extends Operation {
      * @param string $rate
      */
     public function setExchangeRate(?string $rate) { $this->exchangeRate = $rate; }
+
+    /**
+     * Get the value of valueDate
+     */ 
+    public function getValueDate(): ?\DateTimeImmutable
+    {
+        return $this->valueDate;
+    }
+
+    /**
+     * Set the value of valueDate
+     *
+     * @return  self
+     */ 
+    public function setValueDate($valueDate)
+    {
+        $this->valueDate = $valueDate;
+
+        return $this;
+    }
 }

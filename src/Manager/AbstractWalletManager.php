@@ -106,7 +106,8 @@ abstract class AbstractWalletManager
             $class = $this->authClass;
             /** @var AuthorizationInterface $auth */
             $auth = new $class();
-            $auth->setDate(new \DateTimeImmutable('now'));
+            $auth->setDate($r->getDate() ?? new \DateTimeImmutable('today'));
+            $auth->setValueDate($r->getValueDate() ?? new \DateTimeImmutable('today'));
             $auth->setOperationCode($r->getOperationCode());
             $auth->setOperationId($r->getOperationId());
             $auth->setSchemaId($r->getSchemaId());
@@ -142,7 +143,8 @@ abstract class AbstractWalletManager
         if (null === $auth) {
             $auth = $batch->buildAuthorization();
             $auth->setAuthorizationId($this->getNextAuthorizationId());
-            $auth->setDate(new \DateTimeImmutable('now'));
+            $auth->setDate($auth->getDate() ?? new \DateTimeImmutable('today'));
+            $auth->setValueDate($auth->getValueDate() ?? new \DateTimeImmutable('today'));
             $auth->setStatus(Codes::AUTH_STATUS_PENDING);
 
             $auth = $this->beforeAuthorizationInit($auth);
@@ -174,7 +176,8 @@ abstract class AbstractWalletManager
                     $e->setAuthorizationId($auth->getAuthorizationId());
                     $e->setOperationCode($auth->getOperationCode());
                     $e->setOperationId($auth->getOperationId());
-                    $e->setDate(new \DateTimeImmutable('now'));
+                    $e->setDate($auth->getDate());
+                    $e->setValueDate($auth->getValueDate());
                     $e->setPlatformId($auth->getPlatformId());
                     $e->setExchangeRate($auth->getExchangeRate());
 

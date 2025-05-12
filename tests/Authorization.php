@@ -3,10 +3,22 @@ namespace Mukadi\Wallet\Core\Test;
 
 use Mukadi\Wallet\Core\AuthorizationInterface;
 
-class Authorization  implements AuthorizationInterface
+class Authorization implements AuthorizationInterface
 {
+    /** @var \DateTimeImmutable|null */
+    protected ?\DateTimeImmutable $valueDate = null;
+
+    public function getValueDate(): ?\DateTimeImmutable 
+    { 
+        return $this->valueDate; 
+    }
+
+    public function setValueDate(?\DateTimeImmutable $date)
+    { 
+        $this->valueDate = $date; 
+    }
     /** @var  \DateTimeImmutable */
-    protected \DateTimeImmutable $date;
+    protected ?\DateTimeImmutable $date = null;
 
     /** @var  string */
     protected null|string $description;
@@ -67,11 +79,11 @@ class Authorization  implements AuthorizationInterface
     /**
      * @return \DateTimeImmutable
      */
-    public function getDate(): \DateTimeImmutable { return $this->date; }
+    public function getDate(): ?\DateTimeImmutable { return $this->date; }
     /**
      * @param \DateTimeImmutable $date
      */
-    public function setDate(\DateTimeImmutable $date) { $this->date = $date; }
+    public function setDate(?\DateTimeImmutable $date) { $this->date = $date; }
 
     /**
      * @return string|null

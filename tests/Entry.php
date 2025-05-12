@@ -3,7 +3,7 @@ namespace Mukadi\Wallet\Core\Test;
 
 use Mukadi\Wallet\Core\EntryInterface;
 
-class Entry  implements EntryInterface
+class Entry implements EntryInterface
 {
     /** @var  double */
     protected $amount;
@@ -13,6 +13,9 @@ class Entry  implements EntryInterface
     protected $balance;
     /** @var  string */
     protected $currency;
+
+    /** @var \DateTimeImmutable|null */
+    protected ?\DateTimeImmutable $valueDate = null;
 
     /** @var  \DateTimeImmutable */
     protected \DateTimeImmutable $date;
@@ -219,5 +222,15 @@ class Entry  implements EntryInterface
         $this->operationId = $operationId;
 
         return $this;
+    }
+
+    public function getValueDate(): ?\DateTimeImmutable 
+    {
+        return $this->valueDate;
+    }
+
+    public function setValueDate(?\DateTimeImmutable $date)
+    {
+        $this->valueDate = $date;
     }
 }
